@@ -4,6 +4,8 @@
   "description": "Back-end structure connection to mongo",
   "main": "index.js",
   "scripts": {
+    "start": "node ./server",
+    "debug": "nodemon --inspect --harmony ./server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -16,5 +18,8 @@
     "koa": "^2.6.2",
     "koa-router": "^7.4.0",
     "mongodb": "^3.1.10"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9"
   }
 }
