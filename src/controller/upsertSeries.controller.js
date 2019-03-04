@@ -2,25 +2,14 @@ const query = require("../../query");
 const Joi = require("joi");
 const soap = require('soap');
 const parseString = require('xml2js').parseString;
- 
-const schema = Joi.array().items(
-  Joi.object().keys({
-    id: Joi.number().required(),
-    name: Joi.string().required(),
-    series: Joi.array().items(
-      Joi.object().keys({
-        date: Joi.date().max('now').required(),
-        value: Joi.number().allow(null),
-        disabled: Joi.boolean().required()
-      })
-    ).unique().required(),
+// const fs = require('fs');
+const schema = Joi.object({
+  idGroup: Joi.array().items(Joi.number()).single().unique().required(),
+  date: Joi.object({
+    initial: Joi.date().iso().max('now').required().raw(),
+    end: Joi.date().iso().max('now').min(Joi.ref('initial')).required().raw()
   })
-);
-
-function parseDatePTBR(date) {
-  date = date.substring(0,10).split('-')
-  return date[2] + '/' + date[1] + '/' + date[0];
-}
+});
 
 function parseId(id) {
   const parse = {
@@ -34,12 +23,22 @@ function parseId(id) {
     '4390': 'SELIC',
     'default': ''
   }
-  return parse[id] || colors.default;
+  return parse[id] || parse.default;
 }
 
-function parseDate(s) {
-  const date = s.split(/\D+/);
-  return new Date(Date.UTC(date[1], date[0]-1)).toISOString();
+function parseDateCentralBank(date) {
+  const [ year, month, day ] = date.substr(0, 10).split('-');
+  return day + '/' + month + '/' + year;
+}
+
+function parseDate(date, locale) {
+  const d = date.split(/\D+/);
+  switch (locale) {
+    case "pt-BR":
+      return new Date(d[1], d[0]-1);
+    default:
+      return new Date(d[0], d[1]-1);
+  }
 }
 
 function parseStringSync (xml, options) {
@@ -48,26 +47,56 @@ function parseStringSync (xml, options) {
   return result;
 }
 
-const arrayConcatNoDuplicate = (values) => Array.from(new Set([].concat(values)));
-
 module.exports = async (mongoDocument, ctx) => {
-  const {idGroup, date: { initial, end } } = ctx.request.body;
-  const params = {
-    series: [],
-    dateInitial:"",
-    dateEnd: ""
+  const body = schema.validate(ctx.request.body);
+  if(body.error) {
+    return body.error;
   }
-  params.series = arrayConcatNoDuplicate(idGroup).map( id => Number(id));
-  params.dateInitial = parseDatePTBR(initial);
-  params.dateEnd = parseDatePTBR(end);
-  
-  const url = 'https://www3.bcb.gov.br/sgspub/JSP/sgsgeral/FachadaWSSGS.wsdl';
+  const { idGroup, date: { initial, end } } = body.value;
+  const soapClient = {
+    url: 'https://www3.bcb.gov.br/sgspub/JSP/sgsgeral/FachadaWSSGS.wsdl',
+    option: {
+      disableCache: true,
+      wsdl_options: {
+        rejectUnauthorized: false,
+      }
+    },
+    param: {
+      series: idGroup,
+      dateInitial: parseDateCentralBank(initial),
+      dateEnd: parseDateCentralBank(end)
+    },
+    schema: Joi.array().items(
+      Joi.object({
+        ID: Joi.number().required(),
+        item: Joi.array().items(
+          Joi.object({
+            data: Joi.string().regex(/^\d+\/\d+$/, 'MM/YYYY').required(),
+            valor: Joi.number().precision(2).allow("").required(),
+            bloqueado: Joi.boolean().required()
+          })
+        ).single().unique().required(),
+      })
+    ).single().unique().required()
+  }
 
-  return new Promise(function(resolve) {
-    soap.createClient(url, ['disableCache'], function (err, client) {
-      console.log(client);
-      client.getValoresSeriesXML(params, function (err, result) {
-        console.log(err);
+  try {
+    const client = await soap.createClientAsync(soapClient.url, soapClient.option);
+
+    // client.setSecurity(new soap.ClientSSLSecurity(
+    //   './src/client-key.pem',
+    //   './src/client-cert.pem',
+    //   [fs.readFileSync('./src/ca1.pem', 'utf8'), fs.readFileSync('./src/ca2.pem', 'utf8'), fs.readFileSync('./src/ca3.pem', 'utf8')],
+    //    {
+    //     rejectUnauthorized: false
+    //    }
+    // ));
+
+    return new Promise(function(resolve) {
+      client.getValoresSeriesXML(soapClient.param, function (err, result) {
+        if(err) {
+          return resolve(err);
+        }
         const options = {
           explicitRoot: false,
           normalizeTags: true,
@@ -75,24 +104,34 @@ module.exports = async (mongoDocument, ctx) => {
           explicitArray: false
         };
         const parsed = parseStringSync(result.getValoresSeriesXMLReturn.$value, options);
-        const json = [].concat(parsed.serie).map(serie => {
-          return {
-            id: Number(serie.ID),
+        const body = soapClient.schema.validate(parsed.serie);
+        if(body.error) {
+          return resolve(body.error);
+        }
+        const json = body.value.map(serie => (
+          {
+            id: serie.ID,
             name: parseId(serie.ID),
-            series: [].concat(serie.item).map( item =>  {
-              return {
-                date: parseDate(item.data),
-                value: Math.round(item.valor * 100) / 100,
-                disabled: item.bloqueado === "true"
+            series: serie.item.map( item => (
+              {
+                date: parseDate(item.data, "pt-BR"),
+                value: item.valor ? item.valor : null,
+                disabled: item.bloqueado
               }
-            }).reverse()
+            )).reverse()
           }
-        })
-
-        const resultV = schema.validate(json);
-        resolve(resultV.error || query.upsertSeries(mongoDocument)(resultV.value, new Date(end)));
+        ));
+        const param = {
+          items: json,
+          date: {
+            initial: parseDate(initial),
+            end: parseDate(end)
+          }
+        }
+        return resolve(query.upsertSeries(mongoDocument)(param));
       });
     });
-  });
-  
+  } catch(err) {
+    return err.toString();
+  }
 };

@@ -1,30 +1,29 @@
 const query = require("../../query");
 const Joi = require("joi");
- 
-const schema = Joi.object().keys({
-  series: Joi.array().items(Joi.object().keys({
-    id: Joi.number().required()
-  })).unique().required(),
-  date: Joi.object().keys({
-    initial: Joi.date().max('now').required(),
-    end: Joi.date().max('now').min(Joi.ref('initial')).required()
-  })
+const schema = Joi.object({
+  idGroup: Joi.array().items(Joi.number()).single().unique().required(),
+  dateInitial: Joi.date().iso().max('now').required().raw(),
+  dateEnd: Joi.date().iso().max('now').min(Joi.ref('dateInitial')).required().raw()
 });
 
+function parseDate(date) {
+  const [ year, month, day ] = date.substr(0, 10).split('-');
+  return new Date(year, month - 1, day);
+}
+
 module.exports = (mongoDocument, ctx) => {
-  const {idGroup, dateInitial, dateEnd} = ctx.query;
-  const params = {
-    series: [],
-    date: {
-      initial:"",
-      end: ""
-    }
+  const body = schema.validate(ctx.query);
+  if(body.error) {
+    return body.error;
   }
-  params.series = [].concat(idGroup).map( id => ({id: Number(id)}));
-  params.date = {
-    initial: new Date(dateInitial),
-    end: new Date(dateEnd)
+  const { idGroup, dateInitial, dateEnd } = body.value;
+  const params = {
+    series: idGroup.map(_id => ( { _id } )),
+    date: {
+      initial: parseDate(dateInitial),
+      end: parseDate(dateEnd)
+    }
   };
-  const result = schema.validate(params);
-  return result.error || query.getSeries(mongoDocument)(result.value).toArray();
+
+  return query.getSeries(mongoDocument)(params).toArray();
 }
