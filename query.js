@@ -18,8 +18,7 @@ module.exports = {
       },
       {
         $project: {
-          _id: 0,
-          id: 1,
+          _id: 1,
           name: 1,
           series: {
             $filter: {
@@ -39,7 +38,7 @@ module.exports = {
     const seriePush = items.map(item => { 
       return { updateOne: {
         "filter": {
-          "id": item.id,
+          "_id": item.id,
           "series.date": { "$ne": end },
         },
         "update": { 
@@ -63,6 +62,7 @@ module.exports = {
         return { updateOne: {
           "filter": {
             "id": item.id,
+            "_id": item.id,
             $and: [
               { "series.date": serie.date },
               { "series.value": null },
