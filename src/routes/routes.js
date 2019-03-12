@@ -5,16 +5,16 @@ const upsertSeries = require('../controller/upsertSeries.controller');
 
 router.get('/series', async (ctx) => {
   const { client, db } = await require('../mongodb');
-  const documentInvetory2 = db.collection('inventory2');
-  const data = await getSeries(documentInvetory2, ctx);
+  const collection = db.collection('inventory3');
+  const data = await getSeries(collection, ctx);
   ctx.body = {
     status: data.isJoi ? 'error' : 'success',
     data: data
   };
 }).post('/series', async (ctx) => {
   const { client, db } = await require('../mongodb');
-  const documentInvetory2 = db.collection('inventory2');
-  const data = await upsertSeries(documentInvetory2, ctx);
+  const collection = db.collection('inventory3');
+  const data = await upsertSeries(collection, ctx);
   ctx.body = {
     status: data.isJoi ? 'error' : 'success',
     data: data.result || data
