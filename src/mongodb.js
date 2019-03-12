@@ -1,12 +1,11 @@
 const mongoClient = require("mongodb").MongoClient;
-const server = "mongodb://localhost:27018/db";
-const mongo_db = 'test';
+const { db: {host, database } } = require('./../config');
 
 module.exports = (async () => {
   const client = await mongoClient.connect(
-    server,
+    host,
     { useNewUrlParser: true }
   );
-  const db = client.db(mongo_db);
+  const db = client.db(database);
   return { client, db };
 })();
