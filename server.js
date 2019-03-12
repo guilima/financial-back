@@ -1,14 +1,14 @@
 const Koa = require('koa');
-var bodyParser = require('koa-bodyparser');
-const indexRoutes = require('./src/routes/routes');
+const bodyParser = require('koa-bodyparser');
+const allRoutes = require('./src/routes/routes');
+const { port } = require('./config');
 
 const app = new Koa();
-const PORT = process.env.PORT || 1337;
 app.use(bodyParser());
-app.use(indexRoutes.routes());
+app.use(allRoutes.routes());
 
-const server = app.listen(PORT, () => {
-  console.log(`Server listening on port: ${PORT}`);
+const server = app.listen(port, () => {
+  console.log(`Server listening on port: ${port}`);
 });
 
 module.exports = server;
