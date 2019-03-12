@@ -34,39 +34,42 @@ module.exports = {
       }
     ]);
   }),
-  upsertSeries: curry((collection, items, end) => {
-    const seriePush = items.map(item => { 
-      return { updateOne: {
-        "filter": {
-          "_id": item.id,
-          "series.date": { "$ne": end },
-        },
-        "update": { 
-          "$push": { 
-            "series": {
-              $each: item.series.map(serie => {
-                return {
-                  value: serie.value,
-                  disabled: serie.disabled,
-                  date: serie.date
-                }
-              }),
-              "$position": 0
-            },
-          },
-        }
-      }}
-    });
-    const serieSet = [].concat.apply([], items.map(item => {
+  upsertSeries: curry((collection, {items, date: { initial, end }}) => {
+    const serieUpdatePush = [].concat.apply([], items.map(item => {
       return item.series.map(serie => {
+        return {
+          updateOne: {
+            "filter": {
+              "_id": item.id,
+              "series.date": { "$ne": serie.date }
+            },
+            "update": { 
+              "$push": { 
+                "series": {
+                  $each: [{
+                    value: serie.value,
+                    disabled: serie.disabled,
+                    date: serie.date
+                  }],
+                  "$position": 0
+                },
+              },
+            }
+          }
+        }
+      })
+    })).reverse();
+    const serieUpdateSet = [].concat.apply([], items.map(item => {
+      return item.series.filter(serie => serie.value).map(serie => {
         return { updateOne: {
           "filter": {
-            "id": item.id,
             "_id": item.id,
-            $and: [
-              { "series.date": serie.date },
-              { "series.value": null },
-            ]
+            "series": {
+              $elemMatch: {
+                "date": serie.date,
+                "value": { "$ne": serie.value }
+              }
+            }
           },
           "update": { 
             "$set": { "series.$.value": serie.value }
@@ -75,6 +78,6 @@ module.exports = {
       });
     }));
 
-    return collection.bulkWrite(seriePush.concat(serieSet))
+    return collection.bulkWrite(serieUpdateSet.concat(serieUpdatePush))
   })
 }
