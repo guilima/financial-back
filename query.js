@@ -47,9 +47,9 @@ module.exports = {
               "$push": { 
                 "series": {
                   $each: [{
+                    date: serie.date,
                     value: serie.value,
-                    disabled: serie.disabled,
-                    date: serie.date
+                    disabled: serie.disabled
                   }],
                   "$position": 0
                 },
