@@ -26,19 +26,14 @@ function parseId(id) {
   return parse[id] || parse.default;
 }
 
-function parseDateCentralBank(date) {
+function parseDateCentralBankRequest(date) {
   const [ year, month, day ] = date.substr(0, 10).split('-');
   return day + '/' + month + '/' + year;
 }
 
-function parseDate(date, locale) {
-  const d = date.split(/\D+/);
-  switch (locale) {
-    case "pt-BR":
-      return new Date(d[1], d[0]-1);
-    default:
-      return new Date(d[0], d[1]-1);
-  }
+function parseDateCentralBankResponse(date) {
+  const [ month, year ] = date.split(/\D+/);
+  return new Date(`${year}-${month.padStart(2, "0")}`).toISOString();
 }
 
 function parseStringSync (xml, options) {
@@ -63,8 +58,8 @@ module.exports = async (mongoDocument, ctx) => {
     },
     param: {
       series: idGroup,
-      dateInitial: parseDateCentralBank(initial),
-      dateEnd: parseDateCentralBank(end)
+      dateInitial: parseDateCentralBankRequest(initial),
+      dateEnd: parseDateCentralBankRequest(end)
     },
     schema: Joi.array().items(
       Joi.object({
@@ -114,7 +109,7 @@ module.exports = async (mongoDocument, ctx) => {
             name: parseId(serie.ID),
             series: serie.item.map( item => (
               {
-                date: parseDate(item.data, "pt-BR"),
+                date: parseDateCentralBankResponse(item.data),
                 value: item.valor ? item.valor : null,
                 disabled: item.bloqueado
               }
