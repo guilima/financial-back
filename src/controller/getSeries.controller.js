@@ -6,11 +6,6 @@ const schema = Joi.object({
   dateEnd: Joi.date().iso().max('now').min(Joi.ref('dateInitial')).required().raw()
 });
 
-function parseDate(date) {
-  const [ year, month, day ] = date.substr(0, 10).split('-');
-  return new Date(year, month - 1, day);
-}
-
 module.exports = (mongoDocument, ctx) => {
   const body = schema.validate(ctx.query);
   if(body.error) {
@@ -20,8 +15,8 @@ module.exports = (mongoDocument, ctx) => {
   const params = {
     series: idGroup.map(_id => ( { _id } )),
     date: {
-      initial: parseDate(dateInitial),
-      end: parseDate(dateEnd)
+      initial: new Date(dateInitial).toISOString(),
+      end: new Date(dateEnd).toISOString()
     }
   };
 

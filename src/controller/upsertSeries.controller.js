@@ -124,8 +124,8 @@ module.exports = async (mongoDocument, ctx) => {
         const param = {
           items: json,
           date: {
-            initial: parseDate(initial),
-            end: parseDate(end)
+            initial: new Date(initial).toISOString(),
+            end: new Date(end).toISOString()
           }
         }
         return resolve(query.upsertSeries(mongoDocument)(param));
