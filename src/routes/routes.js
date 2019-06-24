@@ -1,24 +1,24 @@
 const Router = require('koa-router');
-const router = new Router();
 const getSeries = require('../controller/getSeries.controller');
 const upsertSeries = require('../controller/upsertSeries.controller');
+const schema = require("../schema/series.schema");
+const validate = require('../middleware/validate');
+const series = new Router();
 
-router.get('/series', async (ctx) => {
+series.get('/series', validate(schema.IGetSeries), async (ctx) => {
   const { client, db } = await require('../mongodb');
   const collection = db.collection('monthly_series');
   const data = await getSeries(collection, ctx);
   ctx.body = {
-    status: data.isJoi ? 'error' : 'success',
     data: data
   };
-}).post('/series', async (ctx) => {
+}).post('/series',  validate(schema.IUpsertSeries), async (ctx) => {
   const { client, db } = await require('../mongodb');
   const collection = db.collection('monthly_series');
   const data = await upsertSeries(collection, ctx);
   ctx.body = {
-    status: data.isJoi ? 'error' : 'success',
-    data: data.result || data
+    data: data
   };
 });
 
-module.exports = router;
+module.exports = series;

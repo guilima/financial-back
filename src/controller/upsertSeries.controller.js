@@ -1,13 +1,5 @@
 const query = require("../../query");
-const Joi = require("joi");
 const CentralBankAPI = require("../services/centralBank.service");
-const schema = Joi.object({
-  idGroup: Joi.array().items(Joi.number()).single().unique().required(),
-  date: Joi.object({
-    initial: Joi.date().iso().max('now').required().raw(),
-    end: Joi.date().iso().max('now').min(Joi.ref('initial')).required().raw()
-  })
-});
 
 function parseId(id) {
   const parse = {
@@ -30,32 +22,24 @@ function parseDateCentralBankResponse(date) {
 }
 
 module.exports = async (mongoDocument, ctx) => {
-  const body = schema.validate(ctx.request.body);
-  if(body.error) {
-    return body.error;
-  }
-  const { idGroup, date: { initial, end } } = body.value;
+  const { idGroup, date: { initial, end } } = ctx.request.body;
 
   try {
     const centralBankAPI = new CentralBankAPI();
-    const body = await centralBankAPI.getValoresSeries({ idGroup, initial, end });
-
-    if(body.error) {
-      return body.error;
-    }
-    const json = body.map(serie => (
-      {
+    const getValoresSeriesResponse = await centralBankAPI.getValoresSeries({ idGroup, initial, end });
+    const json = getValoresSeriesResponse.map(serie => {
+      return {
         id: serie.ID,
         name: parseId(serie.ID),
-        series: serie.item.map( item => (
-          {
+        series: serie.item.map( item => {
+          return {
             date: parseDateCentralBankResponse(item.data),
             value: item.valor ? item.valor : null,
             disabled: item.bloqueado
           }
-        )).reverse()
+        }).reverse()
       }
-    ));
+    });
     const param = {
       items: json,
       date: {
@@ -65,6 +49,6 @@ module.exports = async (mongoDocument, ctx) => {
     }
     return query.upsertSeries(mongoDocument)(param);
   } catch(err) {
-    return err.toString();
+    return err;
   }
 };

@@ -1,18 +1,6 @@
-const Joi = require("joi");
 const soap = require('soap');
 const parseString = require('xml2js').parseString;
-const schema = Joi.array().items(
-  Joi.object({
-    ID: Joi.number().required(),
-    item: Joi.array().items(
-      Joi.object({
-        data: Joi.string().regex(/^\d+\/\d+$/, 'MM/YYYY').required(),
-        valor: Joi.number().precision(2).allow("").required(),
-        bloqueado: Joi.boolean().required()
-      })
-    ).single().unique().required(),
-  })
-).single().unique().required();
+const schema = require("../schema/series.schema");
 
 function parseDateCentralBankRequest(date) {
   const [year, month, day] = date.substr(0, 10).split('-');
@@ -72,7 +60,7 @@ module.exports = class CentralBankAPI {
           explicitArray: false
         }
       );
-      const body = schema.validate(getValoresSeriesJSONResponse.serie);
+      const body = schema.IGetValoresSeriesJSONResponse.validate(getValoresSeriesJSONResponse.serie);
       return body;
     } catch(err) {
       return err;
