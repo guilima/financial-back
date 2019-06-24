@@ -1,6 +1,6 @@
 const query = require("../../query");
 
-module.exports = (mongoDocument, ctx) => {
+module.exports = async (ctx) => {
   const { idGroup, dateInitial, dateEnd } = ctx.request.body;
   const params = {
     series: idGroup.map(_id => ( { _id } )),
@@ -9,5 +9,6 @@ module.exports = (mongoDocument, ctx) => {
       end: new Date(dateEnd).toISOString()
     }
   };
-  return query.getSeries(mongoDocument)(params).toArray();
+  const body = await query.getSeries(params);
+  return body.toArray();
 }

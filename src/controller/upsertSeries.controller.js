@@ -21,7 +21,7 @@ function parseDateCentralBankResponse(date) {
   return new Date(`${year}-${month.padStart(2, "0")}`).toISOString();
 }
 
-module.exports = async (mongoDocument, ctx) => {
+module.exports = async (ctx) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
 
   try {
@@ -47,7 +47,8 @@ module.exports = async (mongoDocument, ctx) => {
         end: new Date(end).toISOString()
       }
     }
-    return query.upsertSeries(mongoDocument)(param);
+    const body = await query.upsertSeries(param);
+    return body;
   } catch(err) {
     return err;
   }
