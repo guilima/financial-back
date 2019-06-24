@@ -1,6 +1,6 @@
 const Router = require('koa-router');
-const getSeries = require('../controller/getSeries.controller');
-const upsertSeries = require('../controller/upsertSeries.controller');
+const getSeries = require('../business/getSeries.business');
+const upsertSeries = require('../business/upsertSeries.business');
 const schema = require("../schema/series.schema");
 const validate = require('../middleware/validate');
 const series = new Router();
