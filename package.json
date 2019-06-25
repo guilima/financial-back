@@ -2,10 +2,13 @@
   "name": "fintech-back",
   "version": "0.0.1",
   "description": "Back-end structure connection to mongo",
-  "main": "index.js",
+  "engines": {
+    "node": "12.x"
+  },
+  "main": "server.js",
   "scripts": {
-    "start": "node -r dotenv/config ./index.js",
-    "debug": "nodemon --inspect --harmony -r dotenv/config ./index.js",
+    "start": "node --experimental-modules -r dotenv/config ./index.js",
+    "debug": "nodemon --experimental-modules --inspect --harmony -r dotenv/config ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -14,6 +17,7 @@
   ],
   "author": "Guilherme Lima",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "@hapi/joi": "^15.1.1",
     "koa": "^2.11.0",

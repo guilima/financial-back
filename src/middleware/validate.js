@@ -1,6 +1,6 @@
-const Joi = require("@hapi/joi");
+import Joi from "@hapi/joi";
 
-module.exports = (schema) => async (ctx, next) => {
+export default (schema) => async (ctx, next) => {
   const { query, method, body } = ctx.request;
   const payload = method === 'GET' ? query : body;
 

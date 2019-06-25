@@ -1,4 +1,5 @@
-const Joi = require("@hapi/joi");
+import Joi from "@hapi/joi";
+
 const IGetSeries = Joi.object({
   idGroup: Joi.array().items(Joi.number()).single().unique().required(),
   dateInitial: Joi.date().iso().max('now').required().raw(),
@@ -24,8 +25,8 @@ const IGetValoresSeriesJSONResponse = Joi.array().items(
   })
 ).single().unique().required();
 
-module.exports = {
-    IGetSeries,
-    IUpsertSeries,
-    IGetValoresSeriesJSONResponse
+export {
+  IGetSeries,
+  IUpsertSeries,
+  IGetValoresSeriesJSONResponse
 }

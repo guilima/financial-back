@@ -1,6 +1,6 @@
-const query = require("../data/query");
+import { getSeries } from "../data/query.js";
 
-module.exports = async (ctx) => {
+export default async (ctx) => {
   const { idGroup, dateInitial, dateEnd } = ctx.request.body;
   const [iYear, iMonth] = dateInitial.split("-");
   const params = {
@@ -10,6 +10,6 @@ module.exports = async (ctx) => {
       end: new Date(dateEnd).toISOString()
     }
   };
-  const body = await query.getSeries(params);
+  const body = await getSeries(params);
   return body.toArray();
 }
