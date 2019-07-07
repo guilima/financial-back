@@ -4,8 +4,8 @@ const series = require('./src/routes/routes');
 const { port } = require('./config');
 
 const app = new Koa();
-app.use(bodyParser());
-app.use(series.routes());
+app.use(bodyParser())
+  .use(series.routes());
 
 const server = app.listen(port, () => {
   console.log(`Server listening on port: ${port}`);

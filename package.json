@@ -4,8 +4,8 @@
   "description": "Back-end structure connection to mongo",
   "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config ./server.js",
-    "debug": "nodemon --inspect --harmony -r dotenv/config ./server.js",
+    "start": "node -r dotenv/config ./index.js",
+    "debug": "nodemon --inspect --harmony -r dotenv/config ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
