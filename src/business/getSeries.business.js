@@ -1,4 +1,4 @@
-const query = require("../../query");
+const query = require("../data/query");
 
 module.exports = async (ctx) => {
   const { idGroup, dateInitial, dateEnd } = ctx.request.body;

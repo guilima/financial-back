@@ -1,4 +1,4 @@
-const query = require("../../query");
+const query = require("../data/query");
 const CentralBankAPI = require("../services/centralBank.service");
 
 function parseId(id) {
@@ -23,9 +23,9 @@ function parseDateCentralBankResponse(date) {
 
 module.exports = async (ctx) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
+  const centralBankAPI = new CentralBankAPI();
 
   try {
-    const centralBankAPI = new CentralBankAPI();
     const getValoresSeriesResponse = await centralBankAPI.getValoresSeries({ idGroup, initial, end });
     const json = getValoresSeriesResponse.map(serie => {
       return {
