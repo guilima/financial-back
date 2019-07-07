@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const IGetSeries = Joi.object({
   idGroup: Joi.array().items(Joi.number()).single().unique().required(),
   dateInitial: Joi.date().iso().max('now').required().raw(),
