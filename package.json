@@ -16,16 +16,16 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^15.1.0",
-    "koa": "^2.6.2",
+    "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
-    "mongodb": "^3.1.10",
+    "mongodb": "^3.2.7",
     "soap": "^0.25.0",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
-    "dotenv": "^6.2.0",
+    "dotenv": "^8.0.0",
     "@types/hapi__joi": "^15.0.2",
-    "nodemon": "^1.18.9"
+    "nodemon": "^1.19.1"
   }
 }
