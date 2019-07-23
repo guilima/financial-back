@@ -7,8 +7,8 @@
   },
   "main": "server.js",
   "scripts": {
-    "start": "node --experimental-modules -r dotenv/config ./index.js",
-    "debug": "nodemon --experimental-modules --inspect --harmony -r dotenv/config ./index.js",
+    "start": "ts-node -r dotenv/config ./index.ts",
+    "debug": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

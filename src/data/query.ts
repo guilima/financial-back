@@ -1,4 +1,4 @@
-import Mongodb from '../mongodb.js';
+import Mongodb from '../mongodb';
 
 const getSeries = async ({series, date: { initial, end }}) => {
   const { client, db } = await Mongodb();
