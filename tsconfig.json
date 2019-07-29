@@ -10,8 +10,13 @@
         "@services/*": ["src/services/*"],
         "*": ["node_modules/*"]
       },
+      "outDir": "dist",
       "moduleResolution": "node",
       "removeComments": true,
       "esModuleInterop": true
-    }
+    },
+    "include": [
+      "index.ts",
+      "update-monthly.scheduled.ts"
+    ]
 }
