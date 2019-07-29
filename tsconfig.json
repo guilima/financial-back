@@ -1,5 +1,17 @@
 {
     "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@business/*": ["src/business/*"],
+        "@data/*": ["src/data/*"],
+        "@middleware/*": ["src/middleware/*"],
+        "@routes/*": ["src/routes/*"],
+        "@schema/*": ["src/schema/*"],
+        "@services/*": ["src/services/*"],
+        "*": ["node_modules/*"]
+      },
+      "moduleResolution": "node",
+      "removeComments": true,
       "esModuleInterop": true
     }
 }

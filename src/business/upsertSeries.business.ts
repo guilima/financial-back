@@ -1,5 +1,5 @@
-import { upsertSeries } from "../data/query";
-import CentralBankAPI from "../services/centralBank.service";
+import { upsertSeries } from "@data/query";
+import CentralBankAPI from "@services/centralBank.service";
 
 function parseId(id) {
   const parse = {

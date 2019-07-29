@@ -1,7 +1,7 @@
 {
 	"verbose": false,
 	"debug": false,
-	"exec": "node --inspect --harmony -r dotenv/config -r ts-node/register ./index.ts",
+	"exec": "node --inspect --harmony -r dotenv/config -r ts-node/register -r tsconfig-paths/register ./index.ts",
 	"ignore": [
 		"node_modules",
 		"./test",

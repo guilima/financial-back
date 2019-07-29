@@ -1,6 +1,6 @@
 import SoapClient from 'soap';
 import Xml2js from 'xml2js';
-import { IGetValoresSeriesJSONResponse } from "../schema/series.schema";
+import { IGetValoresSeriesJSONResponse } from "@schema/series.schema";
 
 function parseDateCentralBankRequest(date: string): string {
   const [year, month, day] = date.substr(0, 10).split('-');

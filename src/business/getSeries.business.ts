@@ -1,4 +1,4 @@
-import { getSeries } from "../data/query";
+import { getSeries } from "@data/query";
 
 export default async (ctx) => {
   const { idGroup, dateInitial, dateEnd } = ctx.request.body;
