@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "dotenv": "^8.0.0",
+    "eslint": "^6.1.0",
     "@types/hapi__joi": "^15.0.2",
     "nodemon": "^1.19.1"
   }
