@@ -1,5 +1,5 @@
 import https from 'https';
-import { port, jwtToken } from './config';
+import { jwtToken } from './config';
 import Crypto from 'crypto';
 
 const today = new Date();
@@ -32,7 +32,6 @@ const signature = Crypto
 const jwt = `${encodedHeader}.${encodedPayload}.${signature}`;
 const options = {
   host: "fintech-backend.herokuapp.com",
-  port: port,
   path: '/series',
   method: 'POST',
   headers: {
