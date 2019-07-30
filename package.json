@@ -22,6 +22,7 @@
   "dependencies": {
     "@hapi/joi": "^15.1.1",
     "koa": "^2.11.0",
+    "@koa/cors": "^2.2.3",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
     "mongodb": "^3.5.5",
