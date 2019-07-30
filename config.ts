@@ -5,8 +5,10 @@ const db = {
   password: process.env.DB_PASSWORD,
 };
 const port = process.env.PORT;
+const jwtToken = process.env.JWT_TOKEN;
 
 export {
   db,
-  port
+  port,
+  jwtToken
 }
