@@ -37,6 +37,7 @@
     "@types/koa-router": "^7.4.0",
     "@types/koa__cors": "^3.0.1",
     "@types/mongodb": "^3.5.3",
+    "@types/xml2js": "^0.4.5",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "nodemon": "^2.0.2",
