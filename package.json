@@ -7,7 +7,7 @@
   },
   "main": "server.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node -r dotenv/config dist/index.js",
     "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s .",
     "debug": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
