@@ -11,7 +11,10 @@
         "*": ["node_modules/*"]
       },
       "outDir": "dist",
-      "moduleResolution": "node",
+      "lib": ["ESNext"],
+      "module": "CommonJS",
+      "target": "ESNext",
+      "moduleResolution": "Node",
       "removeComments": true,
       "esModuleInterop": true
     },
