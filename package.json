@@ -2,10 +2,14 @@
   "name": "fintech-back",
   "version": "0.0.1",
   "description": "Back-end structure connection to mongo",
-  "main": "index.js",
+  "engines": {
+    "node": "12.x"
+  },
+  "main": "server.js",
   "scripts": {
-    "start": "node -r dotenv/config ./index.js",
-    "debug": "nodemon --inspect --harmony -r dotenv/config ./index.js",
+    "start": "node -r dotenv/config dist/index.js",
+    "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s .",
+    "debug": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -17,7 +21,9 @@
   "dependencies": {
     "@hapi/joi": "^15.1.1",
     "koa": "^2.11.0",
+    "@koa/cors": "^2.2.3",
     "koa-bodyparser": "^4.2.1",
+    "koa-jwt": "^3.6.0",
     "koa-router": "^7.4.0",
     "mongodb": "^3.5.5",
     "soap": "^0.25.0",
@@ -25,8 +31,18 @@
   },
   "devDependencies": {
     "@types/hapi__joi": "^15.0.4",
+    "@types/koa": "^2.11.2",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.4.0",
+    "@types/koa__cors": "^3.0.1",
+    "@types/mongodb": "^3.5.3",
+    "@types/xml2js": "^0.4.5",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "ts-node": "^8.3.0",
+    "tsconfig-paths": "^3.8.0",
+    "tscpaths": "0.0.9",
+    "typescript": "^3.5.3"
   }
 }

@@ -1,7 +1,7 @@
-const query = require("../data/query");
-const CentralBankAPI = require("../services/centralBank.service");
+import { upsertSeries } from "@data/query";
+import CentralBankAPI from "@services/centralBank.service";
 
-function parseId(id) {
+function parseId(id: string): string {
   const parse = {
     '4391': 'CDI',
     '433': 'IPCA',
@@ -16,12 +16,12 @@ function parseId(id) {
   return parse[id] || parse.default;
 }
 
-function parseDateCentralBankResponse(date) {
+function parseDateCentralBankResponse(date: string): string {
   const [ month, year ] = date.split(/\D+/);
   return new Date(`${year}-${month.padStart(2, "0")}`).toISOString();
 }
 
-module.exports = async (ctx) => {
+export default async (ctx) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
   const centralBankAPI = new CentralBankAPI();
 
@@ -47,7 +47,7 @@ module.exports = async (ctx) => {
         end: new Date(end).toISOString()
       }
     }
-    const body = await query.upsertSeries(param);
+    const body = await upsertSeries(param);
     return body;
   } catch(err) {
     return err;

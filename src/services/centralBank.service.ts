@@ -1,19 +1,30 @@
-const soap = require('soap');
-const parseString = require('xml2js').parseString;
-const schema = require("../schema/series.schema");
+import SoapClient from 'soap';
+import Xml2js from 'xml2js';
+import { IGetValoresSeriesJSONResponse } from "@schema/series.schema";
 
-function parseDateCentralBankRequest(date) {
+function parseDateCentralBankRequest(date: string): string {
   const [year, month, day] = date.substr(0, 10).split('-');
   return day + '/' + month + '/' + year;
 }
 
-function parseStringSync(xml, options) {
-  let result;
-  parseString(xml, options, (_, r) => { result = r });
+function parseStringSync(xml: Xml2js.convertableToString, options: Xml2js.OptionsV2) {
+  let result: {
+    serie: [{
+      ID: number,
+      item: [{
+        bloqueado: string
+        data: string
+        valor: string
+      }]
+    }]
+  };
+  Xml2js.parseString(xml, options, (_, r) => { result = r });
   return result;
 }
 
-module.exports = class CentralBankAPI {
+export default class CentralBankAPI {
+  url: string;
+  option: SoapClient.IOptions;
   constructor() {
     this.url = 'https://www3.bcb.gov.br/sgspub/JSP/sgsgeral/FachadaWSSGS.wsdl';
     this.option = {
@@ -32,7 +43,7 @@ module.exports = class CentralBankAPI {
     };
 
     try {
-      const client = await soap.createClientAsync(this.url, this.option);
+      const client = await SoapClient.createClientAsync(this.url, this.option);
       // client.setSecurity(new soap.ClientSSLSecurity(
       //   './src/client-key.pem',
       //   './src/client-cert.pem',
@@ -41,7 +52,7 @@ module.exports = class CentralBankAPI {
       //     rejectUnauthorized: false
       //    }
       // ));
-      const getValoresSeriesXMLResponse = await new Promise((resolve, reject) => {
+      const getValoresSeriesXMLResponse: any = await new Promise((resolve, reject) => {
         client.getValoresSeriesXML(param, (err, result) => {
           if(!err) {
             return resolve(result);
@@ -60,7 +71,7 @@ module.exports = class CentralBankAPI {
           explicitArray: false
         }
       );
-      const body = schema.IGetValoresSeriesJSONResponse.validate(getValoresSeriesJSONResponse.serie);
+      const body = IGetValoresSeriesJSONResponse.validate(getValoresSeriesJSONResponse.serie);
       return body;
     } catch(err) {
       return err;

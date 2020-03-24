@@ -1,12 +1,14 @@
-const mongoClient = require("mongodb").MongoClient;
-const { db: {host, database, user, password } } = require('./../config');
+import MongoClient from "mongodb";
+import { db } from '../config';
 
-module.exports = (async () => {
+const { host, database, user, password } = db;
+
+export default (async () => {
   const url = password ? `mongodb://${user}:${password}@${host}/${database}` : `mongodb://${host}/${database}`;
-  const client = await mongoClient.connect(
+  const client = await MongoClient.connect(
     url,
     { useNewUrlParser: true }
   );
   const db = client.db(database);
   return { client, db };
-})();
+});

@@ -1,5 +1,7 @@
+import Mongodb from '../mongodb';
+
 const getSeries = async ({series, date: { initial, end }}) => {
-  const { client, db } = await require('../mongodb');
+  const { client, db } = await Mongodb();
   const collection = db.collection('monthly_series');
   return collection.aggregate([
     { $match:
@@ -25,7 +27,7 @@ const getSeries = async ({series, date: { initial, end }}) => {
 }
 
 const upsertSeries = async ({items, date: { initial, end }}) => {
-  const { client, db } = await require('../mongodb');
+  const { client, db } = await Mongodb();
   const collection = db.collection('monthly_series');
   const serieUpdatePush = [].concat.apply([], items.map(item => {
     return item.series.map(serie => {
@@ -73,7 +75,7 @@ const upsertSeries = async ({items, date: { initial, end }}) => {
   return collection.bulkWrite(serieUpdateSet.concat(serieUpdatePush));
 }
 
-module.exports = {
+export {
   getSeries,
   upsertSeries
 }
