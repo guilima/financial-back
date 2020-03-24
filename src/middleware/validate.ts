@@ -1,6 +1,6 @@
-import Joi from "@hapi/joi";
+import Joi, { ObjectSchema } from "@hapi/joi";
 
-export default (schema) => async (ctx, next) => {
+export default (schema: ObjectSchema) => async (ctx, next) => {
   const { query, method, body } = ctx.request;
   const payload = method === 'GET' ? query : body;
 
