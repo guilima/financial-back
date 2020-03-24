@@ -1,7 +1,7 @@
 import { upsertSeries } from "@data/query";
 import CentralBankAPI from "@services/centralBank.service";
 
-function parseId(id) {
+function parseId(id: string): string {
   const parse = {
     '4391': 'CDI',
     '433': 'IPCA',
@@ -16,7 +16,7 @@ function parseId(id) {
   return parse[id] || parse.default;
 }
 
-function parseDateCentralBankResponse(date) {
+function parseDateCentralBankResponse(date: string): string {
   const [ month, year ] = date.split(/\D+/);
   return new Date(`${year}-${month.padStart(2, "0")}`).toISOString();
 }
