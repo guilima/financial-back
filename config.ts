@@ -6,9 +6,11 @@ const db = {
 };
 const port = process.env.PORT;
 const jwtToken = process.env.JWT_TOKEN;
+const alphaApiKey = process.env.ALPHA_API_KEY;
 
 export {
   db,
   port,
-  jwtToken
+  jwtToken,
+  alphaApiKey
 }
