@@ -8,6 +8,7 @@
         "@routes/*": ["src/routes/*"],
         "@schema/*": ["src/schema/*"],
         "@services/*": ["src/services/*"],
+        "@util/*": ["src/util/*"],
         "*": ["node_modules/*"]
       },
       "outDir": "dist",
