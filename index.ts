@@ -3,6 +3,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import routes from './src/routes/routes';
 import schemaValidator from '@middleware/validate';
+import errorHandler from '@middleware/errorHandler';
 import { port } from './config';
 
 const app = new Koa();
@@ -13,8 +14,12 @@ app.use(bodyParser())
     credentials: true
   }))
   .use(schemaValidator)
+  .use(errorHandler)
   .use(routes.routes())
-  .use(routes.allowedMethods());
+  .use(routes.allowedMethods())
+  .on('error', (err, ctx) => {
+    console.log(err);
+  });
 
 const server = app.listen(port, () => {
   console.log(`Server listening on port: ${port}`);

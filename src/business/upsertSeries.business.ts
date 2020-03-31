@@ -87,6 +87,6 @@ export default async (ctx: Context) => {
       data: await upsertSeries(param)
     };
   } catch(err) {
-    return err;
+    ctx.throw(err);
   }
 };
