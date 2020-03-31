@@ -11,14 +11,14 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
   const { error, value } = Joi.validate(payload, schema);
 
   if (error) {
-    ctx.status = 400;
-    ctx.body = {
-      success: false,
-      message: error.message,
-      data: error.details[0]
-    };
-  } else {
-    ctx.request.body = value;
-    return await next();
+    ctx.assert(error.isJoi, 422, error.message);
+
+    ctx.throw(400, error.message.replace(/['"]/g, ''), { details: error.details.map(({message, type}) => ({
+      message: message.replace(/['"]/g, ''),
+      type
+    }))});
   }
+
+  ctx.request.body = value;
+  return await next();
 }

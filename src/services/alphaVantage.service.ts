@@ -30,7 +30,7 @@ export default class AlphaVantageAPI {
 
       return await Promise.all(body);
     } catch(err) {
-      return err;
+      throw err;
     }
   }
 }
