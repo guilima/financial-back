@@ -1,6 +1,8 @@
-export default async (ctx, next) => {
+import { Context, Next, Middleware } from "koa";
+
+export default async (ctx: Context, next: Next): Promise<Middleware> => {
   try {
-    await next();
+    return await next();
   } catch (err) {
     ctx.status = err.status || 500;
     ctx.body = {
