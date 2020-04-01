@@ -1,6 +1,7 @@
 import { getSeries } from "@data/query";
+import { Context } from "koa";
 
-export default async (ctx) => {
+export default async (ctx: Context) => {
   const { idGroup, dateInitial, dateEnd } = ctx.request.body;
   const [iYear, iMonth] = dateInitial.split("-");
   const params = {
