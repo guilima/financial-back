@@ -1,7 +1,7 @@
 import Joi, { ObjectSchema } from "@hapi/joi";
 import { Context, Next, Middleware } from "koa";
 
-export default async (ctx: Context, next: Next): Promise<Middleware> => {
+export default (schema: ObjectSchema) => async (ctx: Context, next: Next): Promise<Middleware> => {
   const { query, method, body } = ctx.request;
   const payload = method === 'GET' ? query : body;
 

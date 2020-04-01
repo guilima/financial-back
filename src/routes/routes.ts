@@ -6,16 +6,8 @@ import Validate from '@middleware/validate';
 import jwt from '@middleware/jwt';
 const routes = new Router();
 
-routes.get('/series', Validate(IGetSeries), async (ctx) => {
-  const data = await getSeries(ctx);
-  ctx.body = {
-    data: data
-  };
-}).post('/series',  Validate(IUpsertSeries), jwt, async (ctx) => {
-  const data = await upsertSeries(ctx);
-  ctx.body = {
-    data: data
-  };
-});
+routes
+  .get('/series', Validate(IGetSeries), getSeries)
+  .post('/series',  Validate(IUpsertSeries), jwt, upsertSeries);
 
 export default routes;
