@@ -11,6 +11,7 @@ export default async (ctx: Context) => {
       end: new Date(dateEnd).toISOString()
     }
   };
-  const body = await getSeries(params);
-  return body.toArray();
+  return ctx.body = {
+    data: await getSeries(params)
+  };
 }

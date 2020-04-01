@@ -86,8 +86,9 @@ export default async (ctx: Context) => {
         end: new Date(end).toISOString()
       }
     }
-    const body = await upsertSeries(param);
-    return body;
+    return ctx.body = {
+      data: await upsertSeries(param)
+    };
   } catch(err) {
     return err;
   }

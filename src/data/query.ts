@@ -23,7 +23,7 @@ const getSeries = async ({series, date: { initial, end }}) => {
         }
       }
     }
-  ]);
+  ]).toArray();
 }
 
 const upsertSeries = async ({items, date: { initial, end }}) => {
