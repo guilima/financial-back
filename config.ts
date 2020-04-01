@@ -1,16 +1,5 @@
-const db = {
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME_DEVELOPMENT,
-  user: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-};
-const port = process.env.PORT;
-const jwtToken = process.env.JWT_TOKEN;
-const alphaApiKey = process.env.ALPHA_API_KEY;
-
-export {
-  db,
-  port,
-  jwtToken,
-  alphaApiKey
-}
+export const port = process.env.PORT;
+export const appCors = process.env.APP_CORS;
+export const MongoDBURI = process.env.MONGODB_URI;
+export const jwtToken = process.env.JWT_TOKEN;
+export const alphaApiKey = process.env.ALPHA_API_KEY;
