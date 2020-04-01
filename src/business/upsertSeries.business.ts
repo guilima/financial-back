@@ -69,7 +69,7 @@ export default async (ctx: Context) => {
         name: parseId(serie.ID),
         series: serie.item.map( item => {
           return {
-            date: utc(item.data).toISOString(),
+            date: utc(item.data, "MM/YYYY").toISOString(),
             value: item.valor ? item.valor : null,
             disabled: item.bloqueado
           }
