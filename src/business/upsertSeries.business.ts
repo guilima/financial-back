@@ -1,4 +1,5 @@
 import { Context } from "koa";
+import { utc } from 'moment';
 import { upsertSeries } from "@data/query";
 import CentralBankAPI from "@services/centralBank.service";
 import AlphaVantageAPI from "@services/alphaVantage.service";
@@ -16,11 +17,6 @@ function parseId(id: string): string {
     'default': ''
   }
   return parse[id] || parse.default;
-}
-
-function parseDateCentralBankResponse(date: string): string {
-  const [ month, year ] = date.split(/\D+/);
-  return new Date(`${year}-${month.padStart(2, "0")}`).toISOString();
 }
 
 function parseAlphaId(arr: string[], id: string): string[] {
@@ -58,7 +54,7 @@ export default async (ctx: Context) => {
           const currentDate = item["Monthly Time Series"][date];
           const previousDate = item["Monthly Time Series"][datesToInitial[index - 1]];
           return previousDate ? arr.concat({
-            date: new Date(datesToInitial[index - 1].substring(0, 7)).toISOString(),
+            date: utc(datesToInitial[index - 1]).startOf("month").toISOString(),
             value: currentDate ? percentage(currentDate["4. close"], previousDate["4. close"]) : null,
             disabled: false
           }) : arr;
@@ -73,7 +69,7 @@ export default async (ctx: Context) => {
         name: parseId(serie.ID),
         series: serie.item.map( item => {
           return {
-            date: parseDateCentralBankResponse(item.data),
+            date: utc(item.data).toISOString(),
             value: item.valor ? item.valor : null,
             disabled: item.bloqueado
           }

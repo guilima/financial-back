@@ -20,11 +20,12 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^15.1.1",
-    "koa": "^2.11.0",
     "@koa/cors": "^2.2.3",
+    "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-jwt": "^3.6.0",
     "koa-router": "^7.4.0",
+    "moment": "^2.24.0",
     "mongodb": "^3.5.5",
     "soap": "^0.25.0",
     "xml2js": "^0.4.23"
