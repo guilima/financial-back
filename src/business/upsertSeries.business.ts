@@ -1,3 +1,4 @@
+import { Context } from "koa";
 import { upsertSeries } from "@data/query";
 import CentralBankAPI from "@services/centralBank.service";
 import AlphaVantageAPI from "@services/alphaVantage.service";
@@ -34,7 +35,7 @@ function percentage(number1: number, number2: number): number {
   return Number( ( ( total < 0 ? Math.round(total) : Math.ceil(total) ) / 1000 ).toFixed(2) );
 }
 
-export default async (ctx) => {
+export default async (ctx: Context) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
   const centralBankAPI = new CentralBankAPI();
   const alphaVantageAPI = new AlphaVantageAPI();
