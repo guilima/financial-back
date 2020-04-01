@@ -35,10 +35,11 @@ function percentage(number1: number, number2: number): number {
   return Number( ( ( total < 0 ? Math.round(total) : Math.ceil(total) ) / 1000 ).toFixed(2) );
 }
 
+const centralBankAPI = new CentralBankAPI();
+const alphaVantageAPI = new AlphaVantageAPI();
+
 export default async (ctx: Context) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
-  const centralBankAPI = new CentralBankAPI();
-  const alphaVantageAPI = new AlphaVantageAPI();
   const idGroupCentralBank = idGroup.filter(id => parseId(id) !== "Ibovespa");
   const idGroupAlpha = idGroup.reduce(parseAlphaId, []);
   try {
