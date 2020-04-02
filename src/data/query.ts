@@ -29,50 +29,45 @@ const getSeries = async ({series, date: { initial, end }}) => {
 const upsertSeries = async (items) => {
   const { client, db } = await Mongodb();
   const collection = db.collection('monthly_series');
-  const serieUpdatePush = [].concat.apply([], items.map(item => {
-    return item.series.map(serie => {
-      return {
-        updateOne: {
-          "filter": {
-            "_id": item.id,
-            "series.date": { "$ne": serie.date }
-          },
-          "update": {
-            "$push": {
-              "series": {
-                $each: [{
-                  date: serie.date,
-                  value: serie.value,
-                  disabled: serie.disabled
-                }],
-                "$position": 0
-              },
-            },
-          }
-        }
-      }
-    })
-  })).reverse();
-  const serieUpdateSet = [].concat.apply([], items.map(item => {
-    return item.series.filter(serie => serie.value).map(serie => {
-      return { updateOne: {
+  const upsertQuery = items.reduce((arr, item) => {
+    const insertQuery = item.series.map(serie => {
+      return { "updateOne": {
         "filter": {
           "_id": item.id,
-          "series": {
-            $elemMatch: {
-              "date": serie.date,
-              "value": { "$ne": serie.value }
-            }
-          }
+          "series.date": { "$ne": serie.date }
         },
-        "update": {
-          "$set": { "series.$.value": serie.value }
-        }
+        "update": { "$push": {
+          "series": {
+            "$each": [{
+              "date": serie.date,
+              "value": serie.value,
+              "disabled": serie.disabled
+            }],
+            "$position": 0
+          }
+        }}
       }}
     });
-  }));
+    arr = insertQuery.concat(arr);
 
-  return collection.bulkWrite(serieUpdateSet.concat(serieUpdatePush));
+    const updateQuery = item.series
+      .filter(serie => serie.value)
+      .map(serie => {
+        return { "updateOne": {
+          "filter": {
+            "_id": item.id,
+            "series.date": serie.date,
+            "series.value": { "$ne": serie.value }
+          },
+          "update": { "$set": {
+            "series.$.value": serie.value
+          }}
+        }}
+      });
+    return arr.concat(updateQuery);
+  }, []);
+
+  return collection.bulkWrite(upsertQuery);
 }
 
 export {
