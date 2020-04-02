@@ -1,6 +1,6 @@
 import { Context } from "koa";
 import { utc } from 'moment';
-import { upsertSeries } from "@data/query";
+import { upsertSeries } from "@data/series.data";
 import { Serie, SerieAlpha } from "@enums/serie.enum"
 import CentralBankAPI from "@services/centralBank.service";
 import AlphaVantageAPI from "@services/alphaVantage.service";

@@ -1,4 +1,4 @@
-import { getSeries } from "@data/query";
+import { getSeries } from "@data/series.data";
 import { Context } from "koa";
 import { utc } from 'moment';
 
