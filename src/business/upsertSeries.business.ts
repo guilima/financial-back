@@ -1,6 +1,6 @@
 import { Context } from "koa";
 import { utc } from 'moment';
-import { upsertSeries } from "@data/series.data";
+import SeriesData from "@data/series.data";
 import { Serie, SerieAlpha } from "@enums/serie.enum"
 import CentralBankAPI from "@services/centralBank.service";
 import AlphaVantageAPI from "@services/alphaVantage.service";
@@ -12,6 +12,7 @@ function percentage(number1: number, number2: number): number {
 
 const centralBankAPI = new CentralBankAPI();
 const alphaVantageAPI = new AlphaVantageAPI();
+const seriesData = new SeriesData();
 
 export default async (ctx: Context) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
@@ -58,7 +59,7 @@ export default async (ctx: Context) => {
     });
     const series = seriesCentralBank.concat(seriesAlpha);
     return ctx.body = {
-      data: await upsertSeries(series)
+      data: await seriesData.upsert(series)
     };
   } catch(err) {
     ctx.throw(err);
