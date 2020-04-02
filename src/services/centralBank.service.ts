@@ -74,7 +74,7 @@ export default class CentralBankAPI {
       const body = IGetValoresSeriesJSONResponse.validate(getValoresSeriesJSONResponse.serie);
       return body;
     } catch(err) {
-      return err;
+      throw err;
     }
   }
 }
