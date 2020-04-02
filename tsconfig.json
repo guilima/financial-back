@@ -4,6 +4,7 @@
       "paths": {
         "@business/*": ["src/business/*"],
         "@data/*": ["src/data/*"],
+        "@enums/*": ["src/enums/*"],
         "@middleware/*": ["src/middleware/*"],
         "@routes/*": ["src/routes/*"],
         "@schema/*": ["src/schema/*"],
