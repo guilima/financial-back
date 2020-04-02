@@ -26,7 +26,7 @@ const getSeries = async ({series, date: { initial, end }}) => {
   ]).toArray();
 }
 
-const upsertSeries = async ({items, date: { initial, end }}) => {
+const upsertSeries = async (items) => {
   const { client, db } = await Mongodb();
   const collection = db.collection('monthly_series');
   const serieUpdatePush = [].concat.apply([], items.map(item => {

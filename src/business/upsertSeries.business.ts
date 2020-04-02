@@ -1,30 +1,9 @@
 import { Context } from "koa";
 import { utc } from 'moment';
 import { upsertSeries } from "@data/query";
+import { Serie, SerieAlpha } from "@enums/serie.enum"
 import CentralBankAPI from "@services/centralBank.service";
 import AlphaVantageAPI from "@services/alphaVantage.service";
-
-function parseId(id: string): string {
-  const parse = {
-    '4391': 'CDI',
-    '433': 'IPCA',
-    '189': 'IGP-M',
-    '192': 'INCC',
-    '7832': 'Ibovespa',
-    '7830': 'Ouro',
-    '196': 'Poupança',
-    '4390': 'SELIC',
-    'default': ''
-  }
-  return parse[id] || parse.default;
-}
-
-function parseAlphaId(arr: string[], id: string): string[] {
-  const parse = {
-    '7832': '^BVSP'
-  }
-  return parse[id] ? arr.concat(parse[id]) : arr;
-}
 
 function percentage(number1: number, number2: number): number {
   const total = ( ( ( number2 * 100 ) / number1 ) - 100 ) * 1000;
@@ -36,20 +15,21 @@ const alphaVantageAPI = new AlphaVantageAPI();
 
 export default async (ctx: Context) => {
   const { idGroup, date: { initial, end } } = ctx.request.body;
-  const idGroupCentralBank = idGroup.filter(id => parseId(id) !== "Ibovespa");
-  const idGroupAlpha = idGroup.reduce(parseAlphaId, []);
+  const idGroupCentralBank = idGroup.filter((id: number) => !SerieAlpha[id]);
+  const idGroupAlpha = idGroup.reduce((arr: string[], id: number) => arr.concat(SerieAlpha[id] || []), []);
   try {
     const getAlphaMonthlyResponse = await alphaVantageAPI.getMonthlySeries(idGroupAlpha);
-    const alpha = getAlphaMonthlyResponse.map( item => {
+    const seriesAlpha = getAlphaMonthlyResponse.map( (item: any) => {
       const dates = Object.keys(item["Monthly Time Series"]);
       const firstDateIndex = dates.findIndex(date => new RegExp(end.substring(0, 7)).test(date));
       if(firstDateIndex === -1) ctx.throw(500, `Ano e mês ${end} não encontrado na serie temporal mensal (getAlphaMonthlyResponse)`);
       const lastDateIndex = dates.findIndex(date => new RegExp(initial.substring(0, 7)).test(date));
       if(lastDateIndex === -1) ctx.throw(500, `Ano e mês ${initial} não encontrado na serie temporal mensal (getAlphaMonthlyResponse)`);
-      const datesToInitial = dates.slice(firstDateIndex, lastDateIndex + 2)
+      const datesToInitial = dates.slice(firstDateIndex, lastDateIndex + 2);
+      const symbol:string = item["Meta Data"]["2. Symbol"];
       return {
-        id: 7832,
-        name: parseId("7832"),
+        id: SerieAlpha[symbol],
+        name: Serie[SerieAlpha[symbol]],
         series: datesToInitial.reduce((arr, date, index) => {
           const currentDate = item["Monthly Time Series"][date];
           const previousDate = item["Monthly Time Series"][datesToInitial[index - 1]];
@@ -63,10 +43,10 @@ export default async (ctx: Context) => {
     });
 
     const getValoresSeriesResponse = await centralBankAPI.getValoresSeries({ idGroup: idGroupCentralBank, initial, end });
-    const json = getValoresSeriesResponse.map(serie => {
+    const seriesCentralBank = getValoresSeriesResponse.map(serie => {
       return {
         id: serie.ID,
-        name: parseId(serie.ID),
+        name: Serie[serie.ID],
         series: serie.item.map( item => {
           return {
             date: utc(item.data, "MM/YYYY").toISOString(),
@@ -76,15 +56,9 @@ export default async (ctx: Context) => {
         }).reverse()
       }
     });
-    const param = {
-      items: json.concat(alpha),
-      date: {
-        initial: new Date(initial).toISOString(),
-        end: new Date(end).toISOString()
-      }
-    }
+    const series = seriesCentralBank.concat(seriesAlpha);
     return ctx.body = {
-      data: await upsertSeries(param)
+      data: await upsertSeries(series)
     };
   } catch(err) {
     ctx.throw(err);
