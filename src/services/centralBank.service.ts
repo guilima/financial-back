@@ -1,5 +1,5 @@
-import SoapClient from 'soap';
-import Xml2js from 'xml2js';
+import { createClientAsync, IOptions } from 'soap';
+import { convertableToString, parseString, OptionsV2 } from 'xml2js';
 import { IGetValoresSeriesJSONResponse } from "@schema/series.schema";
 
 function parseDateCentralBankRequest(date: string): string {
@@ -7,7 +7,7 @@ function parseDateCentralBankRequest(date: string): string {
   return day + '/' + month + '/' + year;
 }
 
-function parseStringSync(xml: Xml2js.convertableToString, options: Xml2js.OptionsV2) {
+function parseStringSync(xml: convertableToString, options: OptionsV2) {
   let result: {
     serie: [{
       ID: number,
@@ -18,13 +18,13 @@ function parseStringSync(xml: Xml2js.convertableToString, options: Xml2js.Option
       }]
     }]
   };
-  Xml2js.parseString(xml, options, (_, r) => { result = r });
+  parseString(xml, options, (_, r) => { result = r });
   return result;
 }
 
 export default class CentralBankAPI {
   url: string;
-  option: SoapClient.IOptions;
+  option: IOptions;
   constructor() {
     this.url = 'https://www3.bcb.gov.br/sgspub/JSP/sgsgeral/FachadaWSSGS.wsdl';
     this.option = {
@@ -43,7 +43,7 @@ export default class CentralBankAPI {
     };
 
     try {
-      const client = await SoapClient.createClientAsync(this.url, this.option);
+      const client = await createClientAsync(this.url, this.option);
       // client.setSecurity(new soap.ClientSSLSecurity(
       //   './src/client-key.pem',
       //   './src/client-cert.pem',
