@@ -48,18 +48,10 @@ export default class CentralBankAPI {
       //     rejectUnauthorized: false
       //    }
       // ));
-      const getValoresSeriesXMLResponse: any = await new Promise((resolve, reject) => {
-        client.getValoresSeriesXML(param, (err, result) => {
-          if(!err) {
-            return resolve(result);
-          } else {
-            return reject(err);
-          }
-        });
-      });
+      const getValoresSeriesXMLResponse = await client.getValoresSeriesXMLAsync(param);
 
       const getValoresSeriesJSONResponse = parseStringSync(
-        getValoresSeriesXMLResponse.getValoresSeriesXMLReturn.$value,
+        getValoresSeriesXMLResponse[0].getValoresSeriesXMLReturn.$value,
         {
           explicitRoot: false,
           normalizeTags: true,
