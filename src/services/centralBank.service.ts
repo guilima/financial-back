@@ -1,22 +1,7 @@
 import { createClientAsync, IOptions } from 'soap';
-import { convertableToString, parseString, OptionsV2 } from 'xml2js';
+import { parseStringPromise } from 'xml2js';
 import { IGetValoresSeriesJSONResponse } from "@schema/series.schema";
 import { utc } from 'moment';
-
-function parseStringSync(xml: convertableToString, options: OptionsV2) {
-  let result: {
-    serie: [{
-      ID: number,
-      item: [{
-        bloqueado: string
-        data: string
-        valor: string
-      }]
-    }]
-  };
-  parseString(xml, options, (_, r) => { result = r });
-  return result;
-}
 
 export default class CentralBankAPI {
   url: string;
@@ -50,7 +35,7 @@ export default class CentralBankAPI {
       // ));
       const getValoresSeriesXMLResponse = await client.getValoresSeriesXMLAsync(param);
 
-      const getValoresSeriesJSONResponse = parseStringSync(
+      const getValoresSeriesJSONResponse = await parseStringPromise(
         getValoresSeriesXMLResponse[0].getValoresSeriesXMLReturn.$value,
         {
           explicitRoot: false,
