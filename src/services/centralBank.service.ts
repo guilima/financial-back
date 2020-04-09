@@ -1,11 +1,7 @@
 import { createClientAsync, IOptions } from 'soap';
 import { convertableToString, parseString, OptionsV2 } from 'xml2js';
 import { IGetValoresSeriesJSONResponse } from "@schema/series.schema";
-
-function parseDateCentralBankRequest(date: string): string {
-  const [year, month, day] = date.substr(0, 10).split('-');
-  return day + '/' + month + '/' + year;
-}
+import { utc } from 'moment';
 
 function parseStringSync(xml: convertableToString, options: OptionsV2) {
   let result: {
@@ -38,8 +34,8 @@ export default class CentralBankAPI {
   async getValoresSeries(payload) {
     const param = {
       series: payload.idGroup,
-      dateInitial: parseDateCentralBankRequest(payload.initial),
-      dateEnd: parseDateCentralBankRequest(payload.end)
+      dateInitial: utc(payload.initial, "YYYY-MM-DD").format("DD/MM/YYYY"),
+      dateEnd: utc(payload.end, "YYYY-MM-DD").format("DD/MM/YYYY")
     };
 
     try {
