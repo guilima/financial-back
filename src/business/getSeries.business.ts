@@ -1,6 +1,8 @@
-import { getSeries } from "@data/query";
+import SeriesData from "@data/series.data";
 import { Context } from "koa";
 import { utc } from 'moment';
+
+const seriesData = new SeriesData();
 
 export default async (ctx: Context) => {
   const { idGroup, dateInitial, dateEnd } = ctx.request.body;
@@ -12,6 +14,6 @@ export default async (ctx: Context) => {
     }
   };
   return ctx.body = {
-    data: await getSeries(params)
+    data: await seriesData.get(params)
   };
 }
