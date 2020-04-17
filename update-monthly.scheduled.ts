@@ -1,5 +1,5 @@
 import https from 'https';
-import { jwtToken } from './config';
+import { jwtSecret } from './config';
 import Crypto from 'crypto';
 
 const today = new Date();
@@ -25,7 +25,7 @@ const encodedPayload = Buffer
   .toString('base64')
   .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 const signature = Crypto
-  .createHmac('sha256', jwtToken)
+  .createHmac('sha256', jwtSecret)
   .update( `${encodedHeader}.${encodedPayload}`)
   .digest('base64')
   .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
