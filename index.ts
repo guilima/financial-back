@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
-import router from './src/routes/routes';
+import router from './src/routes/index';
 import errorHandler from '@middleware/errorHandler';
 import { appCors, port } from './config';
 
