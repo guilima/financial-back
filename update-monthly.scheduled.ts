@@ -1,4 +1,4 @@
-import https from 'https';
+import { request } from 'https';
 import { jwtSecret } from './config';
 import JwToken from '@utils/jwt.utils';
 
@@ -32,7 +32,7 @@ const options = {
   }
 };
   
-https.request(options, function(res) {
+request(options, function(res) {
   console.log('STATUS: ' + res.statusCode);
   console.log('HEADERS: ' + JSON.stringify(res.headers));
   res.setEncoding('utf8');
