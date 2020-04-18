@@ -3,9 +3,10 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import router from './src/routes/index';
 import errorHandler from '@middleware/errorHandler';
-import { appCors, port } from './config';
+import { appCors, port, cookieKeys } from './config';
 
 const app = new Koa();
+app.keys = cookieKeys;
 app.proxy = true;
 app.use(bodyParser())
   .use(cors({

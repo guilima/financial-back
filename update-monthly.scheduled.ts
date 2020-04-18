@@ -26,7 +26,7 @@ const options = {
   path: '/series',
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${jwToken.sign(claims, jwtSecret, "1 minute")}`,
+    'Cookie': `tokenAccess=${jwToken.sign(claims, jwtSecret, "1 minute")}; path=/series; httponly`,
     'Content-Type': 'application/json',
     'Content-Length': Buffer.byteLength(body)
   }
