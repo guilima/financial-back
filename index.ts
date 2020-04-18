@@ -6,6 +6,7 @@ import errorHandler from '@middleware/errorHandler';
 import { appCors, port } from './config';
 
 const app = new Koa();
+app.proxy = true;
 app.use(bodyParser())
   .use(cors({
     origin: appCors,
