@@ -2,7 +2,6 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import routes from './src/routes/routes';
-import schemaValidator from '@middleware/validate';
 import errorHandler from '@middleware/errorHandler';
 import { appCors, port } from './config';
 
@@ -13,7 +12,6 @@ app.use(bodyParser())
     allowHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
     credentials: true
   }))
-  .use(schemaValidator)
   .use(errorHandler)
   .use(routes.routes())
   .use(routes.allowedMethods())
