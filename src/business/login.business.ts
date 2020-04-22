@@ -1,7 +1,7 @@
 import { Context } from "koa";
 import { scryptSync } from 'crypto';
 import { userLogin } from '@data/user.data';
-import { jwtSecret } from '../../config';
+import { jwtSecret, jwtRefreshSecret } from '../../config';
 import JwToken from '@utils/jwt.utils';
 
 const jwToken = new JwToken();
@@ -16,6 +16,8 @@ export default async (ctx: Context) => {
     name: user.full_name,
     admin: false
   }, jwtSecret, "1 minute");
+  const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, "30 days");
   ctx.cookies.set('tokenAccess' , tokenAcess, {maxAge: 604800000, signed: true});
+  ctx.session.tokenRefresh = tokenRefresh;
   return ctx.body = { data: undefined };
 }
