@@ -2,11 +2,17 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import router from './src/routes/index';
+import session from 'koa-session';
+import redisStore from 'koa-redis';
 import errorHandler from '@middleware/errorHandler';
-import { appCors, port, cookieKeys } from './config';
+import { appCors, port, cookieKeys, redisURI } from './config';
 
 const app = new Koa();
 app.keys = cookieKeys;
+app.use(session({
+  maxAge: 5184000000,
+  store: redisStore({url: redisURI})
+}, app));
 app.proxy = true;
 app.use(bodyParser())
   .use(cors({
