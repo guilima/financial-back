@@ -1,7 +1,7 @@
 import Router from '@koa/router';
+import schemaValidator from '@middleware/schemaValidator';
 import Auth from './auth.routes';
-import schemaValidator from '@middleware/validate';
-import Series from './routes';
+import Series from './series.routes';
 import { DefaultState, Context } from 'koa';
 const router = new Router<DefaultState, Context>();
 router
