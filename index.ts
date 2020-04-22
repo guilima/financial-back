@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
-import routes from './src/routes/routes';
+import router from './src/routes/routes';
 import errorHandler from '@middleware/errorHandler';
 import { appCors, port } from './config';
 
@@ -13,8 +13,8 @@ app.use(bodyParser())
     credentials: true
   }))
   .use(errorHandler)
-  .use(routes.routes())
-  .use(routes.allowedMethods())
+  .use(router.routes())
+  .use(router.allowedMethods())
   .on('error', (err, ctx) => {
     console.log(err);
   });
