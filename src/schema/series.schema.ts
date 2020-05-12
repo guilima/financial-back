@@ -17,11 +17,13 @@ const routeSchemas = {
       })
     })],
     ["/login", object({
+      recaptchaToken: string().required(),
       email: string().email().max(256).required(),
       password: string().required()
     })],
     ["/logout", object({})],
     ["/register", object({
+      recaptchaToken: string().required(),
       userName: string().max(30).required(),
       fullName: string().max(100).required(),
       email: string().email().max(256).required(),
