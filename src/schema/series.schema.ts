@@ -22,6 +22,7 @@ const routeSchemas = {
       password: string().required()
     })],
     ["/logout", object({})],
+    ["/authverify", object({})],
     ["/register", object({
       recaptchaToken: string().required(),
       userName: string().max(30).required(),

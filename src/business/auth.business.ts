@@ -63,8 +63,13 @@ const register = async (ctx: Context) => {
   return ctx.body = { data: data };
 }
 
+const authverify = async (ctx: Context) => {
+  return ctx.status = 204;
+}
+
 export {
   login,
   logout,
-  register
+  register,
+  authverify
 }
