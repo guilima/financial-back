@@ -11,6 +11,7 @@ const app = new Koa();
 app.keys = cookieKeys;
 app.use(session({
   maxAge: 5184000000,
+  sameSite: "none",
   store: redisStore({url: redisURI})
 }, app));
 app.proxy = true;

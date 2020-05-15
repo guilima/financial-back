@@ -22,7 +22,7 @@ export default async (ctx: Context) => {
     admin: false
   }, jwtSecret, "1 minute");
   const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, "30 days");
-  ctx.cookies.set('tokenAccess' , tokenAcess, {maxAge: 604800000, signed: true});
+  ctx.cookies.set('tokenAccess' , tokenAcess, {maxAge: 604800000, signed: true, sameSite: "none"});
   ctx.session.tokenRefresh = tokenRefresh;
   return ctx.body = { data: undefined };
 }
