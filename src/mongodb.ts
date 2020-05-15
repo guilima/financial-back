@@ -1,11 +1,23 @@
 import MongoClient from "mongodb";
-import { MongoDBURI } from '../config';
-
-export async function dbConnection() {
+import { Pool } from "pg";
+import { mongodbURI, postgresURI } from '../config';
+const pool = new Pool({
+  connectionString: postgresURI
+});
+async function mongodb() {
   const client = await MongoClient.connect(
-    MongoDBURI,
+    mongodbURI,
     { useNewUrlParser: true , useUnifiedTopology: true}
   );
   const db = client.db();
   return { client, db };
 };
+
+function postgres() {
+  return pool;
+};
+
+export {
+  mongodb,
+  postgres
+}

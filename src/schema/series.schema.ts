@@ -15,6 +15,19 @@ const routeSchemas = {
         initial: date().iso().max('now').required().raw(),
         end: date().iso().max('now').min(ref('initial')).required().raw()
       })
+    })],
+    ["/login", object({
+      recaptchaToken: string().required(),
+      email: string().email().max(256).required(),
+      password: string().required()
+    })],
+    ["/logout", object({})],
+    ["/register", object({
+      recaptchaToken: string().required(),
+      userName: string().max(30).required(),
+      fullName: string().max(100).required(),
+      email: string().email().max(256).required(),
+      password: string().required()
     })]
   ]
 };

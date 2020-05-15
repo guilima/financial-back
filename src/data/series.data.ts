@@ -1,14 +1,14 @@
-import { dbConnection } from '../mongodb';
+import { mongodb } from '../mongodb';
 import { MongoClient, Db } from 'mongodb';
 
 export default class SeriesData {
-  dbConnection: () => Promise<{ client: MongoClient; db: Db; }>;
+  mongodb: () => Promise<{ client: MongoClient; db: Db; }>;
   constructor() {
-    this.dbConnection = dbConnection;
+    this.mongodb = mongodb;
   }
 
   async get({series, date: { initial, end }}) {
-    const { db } = await this.dbConnection();
+    const { db } = await this.mongodb();
     return db.collection('monthly_series').aggregate([
       { $match:
         { $or: series}
@@ -33,7 +33,7 @@ export default class SeriesData {
   }
 
   async upsert(items) {
-    const { db } = await this.dbConnection();
+    const { db } = await this.mongodb();
     const upsertQuery = items.reduce((arr, item) => {
       const insertQuery = item.series.map(serie => {
         return { "updateOne": {
