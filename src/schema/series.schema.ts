@@ -6,6 +6,9 @@ const routeSchemas = {
       idGroup: array().items(number()).single().unique().required(),
       dateInitial: date().iso().max('now').required().raw(),
       dateEnd: date().iso().max('now').min(ref('dateInitial')).required().raw()
+    })],
+    ["/userExist", object({
+      email: string().email({ tlds: { allow: false } }).required()
     })]
   ],
   post: [
