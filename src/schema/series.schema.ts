@@ -18,7 +18,7 @@ const routeSchemas = {
     })],
     ["/login", object({
       recaptchaToken: string().required(),
-      email: string().email().max(256).required(),
+      email: string().max(256).required(),
       password: string().required()
     })],
     ["/logout", object({})],
@@ -26,7 +26,7 @@ const routeSchemas = {
       recaptchaToken: string().required(),
       userName: string().max(30).required(),
       fullName: string().max(100).required(),
-      email: string().email().max(256).required(),
+      email: string().email({ tlds: { allow: false } }).max(256).required(),
       password: string().required()
     })]
   ]

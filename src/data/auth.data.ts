@@ -1,6 +1,6 @@
 import { postgres } from '../mongodb';
 
-const userRegister = async (user, login) => {
+const authRegister = async (user, login) => {
   const client = await postgres().connect();
   try {
     await client.query('BEGIN')
@@ -19,12 +19,12 @@ const userRegister = async (user, login) => {
   }
 }
 
-const userLogin = async (userEmail) => {
+const authLogin = async (email) => {
   const client = await postgres().connect();
   try {
     await client.query('BEGIN')
     const selectUser = 'SELECT u.id, u.full_name, l.password_hash, l.password_salt FROM users as u INNER JOIN logins as l ON u.id = l.user_id WHERE u.email = $1 AND u.deleted_at IS NULL';
-    const res = await client.query(selectUser, [userEmail]);
+    const res = await client.query(selectUser, [email]);
     return res.rows[0];
   } catch (err) {
     throw err;
@@ -33,7 +33,7 @@ const userLogin = async (userEmail) => {
   }
 }
 
-const userAuthVerify = async (userId) => {
+const authVerify = async (userId) => {
   const client = await postgres().connect();
   try {
     await client.query('BEGIN')
@@ -48,7 +48,7 @@ const userAuthVerify = async (userId) => {
 }
 
 export {
-    userRegister,
-    userAuthVerify,
-    userLogin
+  authRegister,
+  authLogin,
+  authVerify,
 }
