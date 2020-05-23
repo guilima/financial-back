@@ -33,13 +33,13 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
         await redisClient.zadd('blacklist', (jwToken.decode(tokenRefresh).exp * 1000), tokenRefresh);
         await redisClient.zremrangebyscore('blacklist', '-inf', Date.now());
         const { sub: uid, name } = jwToken.decode(tokenAccess);
-        const newTokenAcess = jwToken.sign({
+        const newTokenAccess = jwToken.sign({
             sub: uid,
             name: name,
             admin: false
         }, jwtSecret, '1 minute');
         const newTokenRefresh = jwToken.sign({ sub: uid }, jwtRefreshSecret, '30 days');
-        ctx.cookies.set('tokenAccess' , newTokenAcess, {maxAge: 604800000, signed: true, sameSite: "none"});
+        ctx.cookies.set('tokenAccess', newTokenAccess, {maxAge: 604800000, signed: true, sameSite: "none"});
         ctx.session.tokenRefresh = newTokenRefresh;
         return await next();
     } catch (err) {
