@@ -37,7 +37,7 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
             sub: uid,
             name: name,
             admin: false
-        }, jwtSecret, '1 minute');
+        }, jwtSecret, '7 days');
         const newTokenRefresh = jwToken.sign({ sub: uid }, jwtRefreshSecret, '30 days');
         ctx.cookies.set('tokenAccess', newTokenAccess, {maxAge: 604800000, signed: true, sameSite: "none"});
         ctx.session.tokenRefresh = newTokenRefresh;

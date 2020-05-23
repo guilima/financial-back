@@ -20,9 +20,9 @@ const login = async (ctx: Context) => {
     sub: user.id,
     name: user.full_name,
     admin: false
-  }, jwtSecret, "1 minute");
   const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, "30 days");
   ctx.cookies.set('tokenAccess', tokenAccess, { maxAge: 604800000, signed: true, sameSite: "none" });
+  }, jwtSecret, "7 days");
   ctx.session.tokenRefresh = tokenRefresh;
   return ctx.body = { data: undefined };
 }
