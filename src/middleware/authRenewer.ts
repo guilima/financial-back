@@ -14,21 +14,21 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
             return next();
         }
         if (originalError.name !== 'TokenExpiredError') {
-            ctx.throw(401, "Authentication Error", { originalError });
+            ctx.throw(401, 'Authentication Error', { originalError });
         }
         if(!tokenRefresh) {
-            originalError.detail = "Invalid Refresh Token";
-            ctx.throw(401, "Authentication Error", { originalError });
+            originalError.detail = 'Invalid Refresh Token';
+            ctx.throw(401, 'Authentication Error', { originalError });
         }
         const isRefreshTokenRevoked = Number.isInteger(await redisClient.zrank('blacklist', tokenRefresh));
         if (isRefreshTokenRevoked) {
-            originalError.detail = "Revoked Refresh Token";
-            ctx.throw(401, "Authentication Error", { originalError });
+            originalError.detail = 'Revoked Refresh Token';
+            ctx.throw(401, 'Authentication Error', { originalError });
         }
         const isRefreshTokenExpired = new Date() > new Date(jwToken.decode(tokenRefresh).exp * 1000);
         if (isRefreshTokenExpired) {
-            originalError.detail = "Expired Refresh Token";
-            ctx.throw(401, "Authentication Error", { originalError });
+            originalError.detail = 'Expired Refresh Token';
+            ctx.throw(401, 'Authentication Error', { originalError });
         }
         await redisClient.zadd('blacklist', (jwToken.decode(tokenRefresh).exp * 1000), tokenRefresh);
         await redisClient.zremrangebyscore('blacklist', '-inf', Date.now());
@@ -39,7 +39,7 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
             admin: false
         }, jwtSecret, '7 days');
         const newTokenRefresh = jwToken.sign({ sub: uid }, jwtRefreshSecret, '30 days');
-        ctx.cookies.set('tokenAccess', newTokenAccess, {maxAge: 604800000, signed: true, sameSite: "none"});
+        ctx.cookies.set('tokenAccess', newTokenAccess, {maxAge: 604800000, signed: true, sameSite: 'none'});
         ctx.session.tokenRefresh = newTokenRefresh;
         return await next();
     } catch (err) {

@@ -1,9 +1,9 @@
-import { Context } from "koa";
+import { Context } from 'koa';
 import { scryptSync, randomBytes } from 'crypto';
 import { authLogin, authRegister } from '@data/auth.data';
 import { jwtSecret, jwtRefreshSecret } from '../../config';
 import JwToken from '@utils/jwt.utils';
-import GoogleRecaptchaAPI from "@services/googleRecaptcha.service";
+import GoogleRecaptchaAPI from '@services/googleRecaptcha.service';
 
 const googleRecaptchaAPI = new GoogleRecaptchaAPI();
 const jwToken = new JwToken();
@@ -20,9 +20,9 @@ const login = async (ctx: Context) => {
     sub: user.id,
     name: user.full_name,
     admin: false
-  const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, "30 days");
-  ctx.cookies.set('tokenAccess', tokenAccess, { maxAge: 604800000, signed: true, sameSite: "none" });
-  }, jwtSecret, "7 days");
+  }, jwtSecret, '7 days');
+  const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, '30 days');
+  ctx.cookies.set('tokenAccess', tokenAccess, { maxAge: 604800000, signed: true, sameSite: 'none' });
   ctx.session.tokenRefresh = tokenRefresh;
   return ctx.body = { data: undefined };
 }
