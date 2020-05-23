@@ -58,9 +58,18 @@ const register = async (ctx: Context) => {
     }
   }
 
-  const data = await authRegister(param.user,  param.login);
+  const user = await authRegister(param.user,  param.login);
 
-  return ctx.body = { data: data };
+  const tokenAccess = jwToken.sign({
+    sub: user.id,
+    name: fullName,
+    admin: false
+  }, jwtSecret, '7 days');
+  const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, '30 days');
+  ctx.cookies.set('tokenAccess', tokenAccess, { maxAge: 604800000, signed: true, sameSite: 'none' });
+  ctx.session.tokenRefresh = tokenRefresh;
+
+  return ctx.body = { data: param.user };
 }
 
 const authverify = async (ctx: Context) => {

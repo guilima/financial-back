@@ -11,6 +11,7 @@ const authRegister = async (user, login) => {
     const insertUserRole = 'INSERT INTO users_roles(user_id, role_id) VALUES($1, $2)';
     await client.query(insertUserRole, [res.rows[0].id, 0]);
     await client.query('COMMIT');
+    return res.rows[0];
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
