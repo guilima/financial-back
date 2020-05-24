@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 import { scryptSync, randomBytes } from 'crypto';
-import { authLogin, authRegister } from '@data/auth.data';
+import { authLogin, authUpdateLogin, authRegister } from '@data/auth.data';
 import { jwtSecret, jwtRefreshSecret } from '../../config';
 import JwToken from '@utils/jwt.utils';
 import GoogleRecaptchaAPI from '@services/googleRecaptcha.service';
@@ -14,16 +14,17 @@ const login = async (ctx: Context) => {
   if (!googleRecaptchaVerify.success) ctx.throw(401, `Recaptcha Token Inválido`, googleRecaptchaVerify);
   const user = await authLogin(email);
   if (!user) ctx.throw(403, `Email não cadastrado`);
-  const isVerifiedPassword = scryptSync(password, user.password_salt, 64, { N: 1024 }).toString('hex') === user.password_hash;
+  const isVerifiedPassword = scryptSync(password, user.passwordSalt, 64, { N: 1024 }).toString('hex') === user.passwordHash;
   if (!isVerifiedPassword) ctx.throw(401, `Senha inválida`);
   const tokenAccess = jwToken.sign({
     sub: user.id,
-    name: user.full_name,
+    name: user.fullName,
     admin: false
   }, jwtSecret, '7 days');
   const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, '30 days');
   ctx.cookies.set('tokenAccess', tokenAccess, { maxAge: 604800000, signed: true, sameSite: 'none' });
   ctx.session.tokenRefresh = tokenRefresh;
+  await authUpdateLogin({loggedAt: new Date()}, user.id);
   return ctx.body = { data: undefined };
 }
 
@@ -48,8 +49,7 @@ const register = async (ctx: Context) => {
     user: {
       userName,
       fullName,
-      email,
-      createdAt: new Date().toISOString(),
+      email
     },
     login: {
       passwordHash,
@@ -58,14 +58,14 @@ const register = async (ctx: Context) => {
     }
   }
 
-  const user = await authRegister(param.user,  param.login);
+  const userId = await authRegister(param.user,  param.login);
 
   const tokenAccess = jwToken.sign({
-    sub: user.id,
+    sub: userId,
     name: fullName,
     admin: false
   }, jwtSecret, '7 days');
-  const tokenRefresh = jwToken.sign({ sub: user.id }, jwtRefreshSecret, '30 days');
+  const tokenRefresh = jwToken.sign({ sub: userId }, jwtRefreshSecret, '30 days');
   ctx.cookies.set('tokenAccess', tokenAccess, { maxAge: 604800000, signed: true, sameSite: 'none' });
   ctx.session.tokenRefresh = tokenRefresh;
 

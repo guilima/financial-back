@@ -1,55 +1,60 @@
-import { postgres } from '../mongodb';
+import { postgres } from '../../db';
 
-const authRegister = async (user, login) => {
-  const client = await postgres().connect();
+const authRegister = async (user: {[key: string]: string}, login: {[key: string]: any}) => {
+  const knex = await postgres();
+  const trxProvider = knex.transactionProvider();
+  const trx = await trxProvider();
   try {
-    await client.query('BEGIN')
-    const insertUser = 'INSERT INTO users(user_name, full_name, email, created_at) VALUES($1, $2, $3, $4) RETURNING id';
-    const res = await client.query(insertUser, Object.values(user));
-    const insertLogin = 'INSERT INTO logins(password_hash, password_salt, ip_address, user_id) VALUES($1, $2, $3, $4)';
-    await client.query(insertLogin, Object.values(login).concat(res.rows[0].id));
-    const insertUserRole = 'INSERT INTO users_roles(user_id, role_id) VALUES($1, $2)';
-    await client.query(insertUserRole, [res.rows[0].id, 0]);
-    await client.query('COMMIT');
-    return res.rows[0];
+    const userId = await trx('users').insert(user, 'id');
+    await trx('logins').insert(Object.assign(login, {user_id: userId[0]}));
+    await trx('users_roles').insert({user_id: userId[0], role_id: 1});
+    await trx.commit();
+    return userId[0];
   } catch (err) {
-    await client.query('ROLLBACK');
+    await trx.rollback()
     throw err;
-  } finally {
-    client.release();
   }
 }
 
-const authLogin = async (email) => {
-  const client = await postgres().connect();
+const authLogin = async (email: string) => {
+  const knex = await postgres();
   try {
-    await client.query('BEGIN')
-    const selectUser = 'SELECT u.id, u.full_name, l.password_hash, l.password_salt FROM users as u INNER JOIN logins as l ON u.id = l.user_id WHERE u.email = $1 AND u.deleted_at IS NULL';
-    const res = await client.query(selectUser, [email]);
-    return res.rows[0];
+    const user = await knex.select('u.id', 'u.full_name', 'l.password_hash', 'l.password_salt')
+      .from('users AS u')
+      .innerJoin('logins AS l', 'l.user_id', 'u.id')
+      .whereNull('u.deleted_at')
+      .andWhere('u.email', '=', email);
+    return user[0];
   } catch (err) {
     throw err;
-  } finally {
-    client.release();
+  }
+}
+
+const authUpdateLogin = async(data: {loggedAt: Date}, id: number) => {
+  const knex = await postgres();
+  try {
+    const login = await knex('logins').where('user_id', '=', id).update(data);
+    return login[0];
+  } catch (err) {
+    throw err;
   }
 }
 
 const authVerify = async (userId) => {
-  const client = await postgres().connect();
+  const knex = await postgres();
   try {
-    await client.query('BEGIN')
-    const selectUser = 'SELECT u.id, u.full_name FROM users as u WHERE u.id = $1 AND u.deleted_at IS NULL';
-    const res = await client.query(selectUser, [userId]);
-    return res.rows[0];
+    const user = await knex('users').select('id', 'full_name')
+      .whereNull('deleted_at')
+      .andWhere('id', '=', userId);
+    return user[0];
   } catch (err) {
     throw err;
-  } finally {
-    client.release();
   }
 }
 
 export {
   authRegister,
   authLogin,
+  authUpdateLogin,
   authVerify,
 }

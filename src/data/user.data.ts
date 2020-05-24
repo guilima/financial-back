@@ -1,16 +1,14 @@
-import { postgres } from '../mongodb';
+import { postgres } from '../../db';
 
 const userFindByEmail = async (email: string) => {
-  const client = await postgres().connect();
+  const knex = await postgres();
   try {
-    await client.query('BEGIN')
-    const selectUser = 'SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL';
-    const res = await client.query(selectUser, [email]);
-    return res.rows[0];
+    const user = await knex('users').select('*')
+      .whereNull('deleted_at')
+      .andWhere('email', '=', email);
+    return user[0];
   } catch (err) {
-    throw err;
-  } finally {
-    client.release();
+    throw {err};
   }
 }
 
