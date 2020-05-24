@@ -30,6 +30,16 @@ const authLogin = async (email: string) => {
   }
 }
 
+const authUpdateLogin = async(data: {loggedAt: Date}, id: number) => {
+  const knex = await postgres();
+  try {
+    const login = await knex('logins').where('user_id', '=', id).update(data);
+    return login[0];
+  } catch (err) {
+    throw err;
+  }
+}
+
 const authVerify = async (userId) => {
   const knex = await postgres();
   try {
@@ -45,5 +55,6 @@ const authVerify = async (userId) => {
 export {
   authRegister,
   authLogin,
+  authUpdateLogin,
   authVerify,
 }
