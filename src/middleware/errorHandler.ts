@@ -10,7 +10,7 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
         status: ctx.status,
         type: err.name,
         message: err.message,
-        details: err.details
+        details: err.details || [].concat(err.detail || [])
       }
     }
     ctx.app.emit('error', err, ctx);
