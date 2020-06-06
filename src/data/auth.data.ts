@@ -1,4 +1,4 @@
-import { postgres } from '../../db';
+import { postgres } from '@root/db';
 
 const authRegister = async (user: {[key: string]: string}, login: {[key: string]: any}) => {
   const knex = await postgres();

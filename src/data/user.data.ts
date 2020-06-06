@@ -1,4 +1,4 @@
-import { postgres } from '../../db';
+import { postgres } from '@root/db';
 
 const userFindByEmail = async (email: string) => {
   const knex = await postgres();
