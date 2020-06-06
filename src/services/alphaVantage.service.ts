@@ -1,5 +1,5 @@
 import Https from 'https';
-import { alphaApiKey } from '../../config';
+import { alphaApiKey } from '@root/config';
 // import { IGetValoresSeriesJSONResponse } from "@schema/series.schema";
 
 export default class AlphaVantageAPI {

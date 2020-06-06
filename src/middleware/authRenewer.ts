@@ -1,4 +1,4 @@
-import { jwtSecret, jwtRefreshSecret } from '../../config';
+import { jwtSecret, jwtRefreshSecret } from '@root/config';
 import JwToken from '@utils/jwt.utils';
 import { Context, Next, Middleware } from 'koa';
 

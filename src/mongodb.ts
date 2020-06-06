@@ -1,5 +1,5 @@
 import MongoClient from "mongodb";
-import { mongodbURI } from '../config';
+import { mongodbURI } from '@root/config';
 
 export const mongodb = async() => {
   const client = await MongoClient.connect(

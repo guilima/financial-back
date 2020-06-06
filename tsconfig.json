@@ -2,6 +2,7 @@
     "compilerOptions": {
       "baseUrl": ".",
       "paths": {
+        "@root/*": ["*"],
         "@business/*": ["src/business/*"],
         "@data/*": ["src/data/*"],
         "@enums/*": ["src/enums/*"],

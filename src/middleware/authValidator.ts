@@ -1,5 +1,5 @@
 import koaJwt from 'koa-jwt';
-import { jwtSecret } from '../../config';
+import { jwtSecret } from '@root/config';
 
 export default koaJwt({
   cookie: "tokenAccess",
