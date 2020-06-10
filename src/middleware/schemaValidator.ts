@@ -6,7 +6,7 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
   const { query, method, body } = ctx.request;
   const payload = method === 'GET' ? query : body;
   const schemas: Map<string, ObjectSchema> = new Map(routeSchemas[method.toLocaleLowerCase()]);
-  const schema = schemas.get(ctx.path);
+  const schema = schemas.get(ctx._matchedRoute);
 
   const { error, value } = schema.validate(payload);
 
