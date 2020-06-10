@@ -10,8 +10,11 @@
     "start": "node -r dotenv/config dist/index.js",
     "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s .",
     "debug": "nodemon",
-    "migrate": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:latest config",
-    "unmigrate": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:rollback config",
+    "migrate": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:latest",
+    "migrate:up": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:up",
+    "migrate:list": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:list",
+    "migrate:down": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:down",
+    "unmigrate": "node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:rollback",
     "seed": "node -r dotenv/config ./node_modules/knex/bin/cli.js seed:run ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
