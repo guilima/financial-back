@@ -2,14 +2,11 @@ import * as Knex from "knex";
 
 
 export async function up(knex: Knex): Promise<any> {
-    await knex.schema.createTable('roles', function(table) {
+    return knex.schema.createTable('roles', function(table) {
         table.increments();
         table.string('name', 20).unique();
-        table.text('description');
+        table.string('description', 255);
     });
-    return knex('roles').insert([
-        {name: 'user', description: 'View stats, analytics, and service configuration information for all services on an account.'},
-    ]);
 }
 
 
