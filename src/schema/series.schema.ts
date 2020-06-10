@@ -1,4 +1,5 @@
 import { object, array, ref, date, number, string, boolean } from "@hapi/joi";
+import { SearchType } from "@enums/search.enum";
 
 const routeSchemas = {
   get: [
@@ -9,7 +10,14 @@ const routeSchemas = {
     })],
     ["/userExist", object({
       email: string().email({ tlds: { allow: false } }).required()
-    })]
+    })],
+    ["/wallet", object({})],
+    ["/wallet/:id", object({})],
+    ["/wallet/:id/search", object({
+      type: number().valid(...Object.values(SearchType).filter(item => Number.isInteger(item))),
+      term: string().required()
+    })],
+    ["/wallet/:id/payment/:id", object({})],
   ],
   post: [
     ["/series", object({
@@ -32,7 +40,11 @@ const routeSchemas = {
       fullName: string().max(100).required(),
       email: string().email({ tlds: { allow: false } }).max(256).required(),
       password: string().required()
-    })]
+    })],
+    ["/wallet", object({
+      name: string().max(50).required(),
+      description: string().max(255),
+    })],
   ]
 };
 const IGetValoresSeriesJSONResponse = array().items(
