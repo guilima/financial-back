@@ -1,10 +1,9 @@
-import { postgres } from '@root/db';
+import { psqlKnex } from '@root/db';
 
 const WalletData = {
   selectByUserId: async (id: number) => {
-    const knex = await postgres();
     try {
-      const listWallet = await knex.select('W.id', 'w.name', 'w.description')
+      const listWallet = await psqlKnex.select('W.id', 'w.name', 'w.description')
         .from('wallets AS W')
         .where('W.user_id', '=', id);
       return listWallet;
@@ -13,9 +12,8 @@ const WalletData = {
     }
   },
   insert: async (data: {userId: number, name: string, description?: string}) => {
-    const knex = await postgres();
     try {
-      const walletId = await knex('wallets').insert(data);
+      const walletId = await psqlKnex('wallets').insert(data);
       return walletId;
     } catch (err) {
       throw err;
@@ -24,9 +22,8 @@ const WalletData = {
 }
 
 const paymentsByWalletId = async (id: number) => {
-  const knex = await postgres();
   try {
-    const listPayment = await knex.select('P.id', 'P.date', 'P.price', 'P.installment', 'P.type_id', knex.raw('to_json(PR.name) as product'), knex.raw('to_json(CA.name) as category'), knex.raw('to_json(M.name) as manufacturer'))
+    const listPayment = await psqlKnex.select('P.id', 'P.date', 'P.price', 'P.installment', 'P.type_id', psqlKnex.raw('to_json(PR.name) as product'), psqlKnex.raw('to_json(CA.name) as category'), psqlKnex.raw('to_json(M.name) as manufacturer'))
       .from('payments AS P')
       .innerJoin('products AS PR', 'PR.id', '=', 'P.product_id')
       .leftJoin('products_manufacturers AS PMA', 'PR.id', '=', 'PMA.manufacturer_id')
@@ -42,9 +39,8 @@ const paymentsByWalletId = async (id: number) => {
 }
 
 const detailByPaymentId = async (id: number) => {
-  const knex = await postgres();
   try {
-    const detailPayment = await knex.select('P.date', 'P.price', 'P.installment', 'P.type_id', 'PR.id', 'PR.name', knex.raw('to_json(M.*) as manufacturer'), knex.raw('to_json(CA.*) as category'), knex.raw('to_json(M.*) as manufacturer'), knex.raw('to_json(C.*) as card'))
+    const detailPayment = await psqlKnex.select('P.date', 'P.price', 'P.installment', 'P.type_id', 'PR.id', 'PR.name', psqlKnex.raw('to_json(M.*) as manufacturer'), psqlKnex.raw('to_json(CA.*) as category'), psqlKnex.raw('to_json(M.*) as manufacturer'), psqlKnex.raw('to_json(C.*) as card'))
       .from('payments AS P')
       .leftJoin('payments_cards AS PC', 'P.id', '=', 'PC.payment_id')
       .leftJoin('cards AS C', 'C.id', '=', 'PC.card_id')
@@ -61,8 +57,7 @@ const detailByPaymentId = async (id: number) => {
 }
 
 const registerPayment = async (walletId: number, { payment, product, category, manufacturer, cardId }) => {
-  const knex = await postgres();
-  const trxProvider = knex.transactionProvider();
+  const trxProvider = psqlKnex.transactionProvider();
   const trx = await trxProvider();
   try {
     const [categoryId] = category.id || await trx('manufacturers').insert(category);
@@ -83,9 +78,8 @@ const registerPayment = async (walletId: number, { payment, product, category, m
 }
 
 const productsByName = async (walletId: number, name: string) => {
-  const knex = await postgres();
   try {
-    const products = await knex.select('PR.*', knex.raw('to_json(M.*) as manufacturer'), knex.raw('to_json(CA.*) as category'))
+    const products = await psqlKnex.select('PR.*', psqlKnex.raw('to_json(M.*) as manufacturer'), psqlKnex.raw('to_json(CA.*) as category'))
       .from('payments AS P')
       .innerJoin('products AS PR', 'PR.id', '=', 'P.product_id')
       .leftJoin('products_manufacturers AS PMA', 'PR.id', '=', 'PMA.manufacturer_id')
@@ -100,9 +94,8 @@ const productsByName = async (walletId: number, name: string) => {
 }
 
 const manufacturersByName = async (walletId: number, name: string) => {
-  const knex = await postgres();
   try {
-    const products = await knex.select('M.*')
+    const products = await psqlKnex.select('M.*')
       .from('payments AS P')
       .innerJoin('products AS PR', 'PR.id', '=', 'P.product_id')
       .innerJoin('products_manufacturers AS PMA', 'PR.id', '=', 'PMA.manufacturer_id')
@@ -115,9 +108,8 @@ const manufacturersByName = async (walletId: number, name: string) => {
 }
 
 const categoriesByName = async (walletId: number, name: string) => {
-  const knex = await postgres();
   try {
-    const products = await knex.select('CA.*')
+    const products = await psqlKnex.select('CA.*')
       .from('payments AS P')
       .innerJoin('products AS PR', 'PR.id', '=', 'P.product_id')
       .innerJoin('products_categories AS PCA', 'PR.id', '=', 'PCA.category_id')

@@ -1,8 +1,7 @@
-import { postgres } from '@root/db';
+import { psqlKnex } from '@root/db';
 
 const authRegister = async (user: {[key: string]: string}, login: {[key: string]: any}) => {
-  const knex = await postgres();
-  const trxProvider = knex.transactionProvider();
+  const trxProvider = psqlKnex.transactionProvider();
   const trx = await trxProvider();
   try {
     const userId = await trx('users').insert(user, 'id');
@@ -17,9 +16,8 @@ const authRegister = async (user: {[key: string]: string}, login: {[key: string]
 }
 
 const authLogin = async (email: string) => {
-  const knex = await postgres();
   try {
-    const user = await knex.select('u.id', 'u.full_name', 'l.password_hash', 'l.password_salt')
+    const user = await psqlKnex.select('u.id', 'u.full_name', 'l.password_hash', 'l.password_salt')
       .from('users AS u')
       .innerJoin('logins AS l', 'l.user_id', 'u.id')
       .whereNull('u.deleted_at')
@@ -31,9 +29,8 @@ const authLogin = async (email: string) => {
 }
 
 const authUpdateLogin = async(data: {loggedAt: Date}, id: number) => {
-  const knex = await postgres();
   try {
-    const login = await knex('logins').where('user_id', '=', id).update(data);
+    const login = await psqlKnex('logins').where('user_id', '=', id).update(data);
     return login[0];
   } catch (err) {
     throw err;
@@ -41,9 +38,8 @@ const authUpdateLogin = async(data: {loggedAt: Date}, id: number) => {
 }
 
 const authVerify = async (userId) => {
-  const knex = await postgres();
   try {
-    const user = await knex('users').select('id', 'full_name')
+    const user = await psqlKnex('users').select('id', 'full_name')
       .whereNull('deleted_at')
       .andWhere('id', '=', userId);
     return user[0];
