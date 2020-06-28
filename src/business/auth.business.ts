@@ -1,7 +1,8 @@
 import { Context } from 'koa';
 import { scryptSync, randomBytes } from 'crypto';
 import { authLogin, authUpdateLogin, authRegister } from '@data/auth.data';
-import { jwtSecret, jwtRefreshSecret } from '../../config';
+import { jwtSecret, jwtRefreshSecret } from '@root/config';
+import { redisStore } from '@root/db';
 import JwToken from '@utils/jwt.utils';
 import GoogleRecaptchaAPI from '@services/googleRecaptcha.service';
 
@@ -31,9 +32,8 @@ const login = async (ctx: Context) => {
 const logout = async (ctx: Context) => {
   ctx.cookies.set('tokenAccess');
   if (ctx.session.tokenRefresh) {
-    const redisClient = ctx.session._sessCtx.store.client;
-    await redisClient.zadd('blacklist', (jwToken.decode(ctx.session.tokenRefresh).exp * 1000), ctx.session.tokenRefresh);
-    await redisClient.zremrangebyscore('blacklist', '-inf', Date.now());
+    await redisStore.client.zadd('blacklist', (jwToken.decode(ctx.session.tokenRefresh).exp * 1000), ctx.session.tokenRefresh);
+    await redisStore.client.zremrangebyscore('blacklist', '-inf', Date.now());
     delete ctx.session.tokenRefresh;
   }
   return ctx.body = { data: undefined };

@@ -1,11 +1,11 @@
 import { jwtSecret, jwtRefreshSecret } from '@root/config';
 import JwToken from '@utils/jwt.utils';
 import { Context, Next, Middleware } from 'koa';
+import { redisStore } from '@root/db';
 
 const jwToken = new JwToken();
 
 export default async (ctx: Context, next: Next): Promise<Middleware> => {
-    const redisClient = ctx.session._sessCtx.store.client;
     const tokenAccess = ctx.cookies.get('tokenAccess', {signed: true});
     const tokenRefresh = ctx.session.tokenRefresh;
     try {
@@ -20,7 +20,7 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
             originalError.detail = 'Invalid Refresh Token';
             ctx.throw(401, 'Authentication Error', { originalError });
         }
-        const isRefreshTokenRevoked = Number.isInteger(await redisClient.zrank('blacklist', tokenRefresh));
+        const isRefreshTokenRevoked = Number.isInteger(await redisStore.client.zrank('blacklist', tokenRefresh));
         if (isRefreshTokenRevoked) {
             originalError.detail = 'Revoked Refresh Token';
             ctx.throw(401, 'Authentication Error', { originalError });
@@ -30,8 +30,8 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
             originalError.detail = 'Expired Refresh Token';
             ctx.throw(401, 'Authentication Error', { originalError });
         }
-        await redisClient.zadd('blacklist', (jwToken.decode(tokenRefresh).exp * 1000), tokenRefresh);
-        await redisClient.zremrangebyscore('blacklist', '-inf', Date.now());
+        await redisStore.client.zadd('blacklist', (jwToken.decode(tokenRefresh).exp * 1000), tokenRefresh);
+        await redisStore.client.zremrangebyscore('blacklist', '-inf', Date.now());
         const { sub: uid, name } = jwToken.decode(tokenAccess);
         const newTokenAccess = jwToken.sign({
             sub: uid,
@@ -44,8 +44,8 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
         return await next();
     } catch (err) {
         if(!err.originalError.detail && tokenRefresh) {
-            await redisClient.zadd('blacklist', (jwToken.decode(tokenRefresh).exp * 1000), tokenRefresh);
-            await redisClient.zremrangebyscore('blacklist', '-inf', Date.now());
+            await redisStore.client.zadd('blacklist', (jwToken.decode(tokenRefresh).exp * 1000), tokenRefresh);
+            await redisStore.client.zremrangebyscore('blacklist', '-inf', Date.now());
         }
         ctx.cookies.set('tokenAccess');
         delete ctx.session.tokenRefresh;
