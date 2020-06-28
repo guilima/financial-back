@@ -4,7 +4,7 @@ import { SearchType } from "@enums/search.enum";
 import { PaymentType } from "@root/src/enums/payment.enum";
 import { utc } from "moment";
 
-interface Item {id?: number, name: string, description?: string}
+interface IdName {id?: number, name: string}
 const WalletBusiness = {
   get: async (ctx: Context) => {
     try {
@@ -30,11 +30,11 @@ const PaymentBusiness = {
   post: async (ctx: Context) => {
     interface Payment {
       payment: {date: Date, price: string, installment: number, typeId: PaymentType},
-      product: Item,
-      category: Item,
+      product: IdName,
+      category: IdName,
       customer: {id?:number, name: string, bank: number, card?: any},
-      manufacturer: Item,
-      tags: Item[],
+      manufacturer: IdName,
+      tags: IdName[],
     }
     const { id } = ctx.params;
     const request = ctx.request.body;
@@ -48,19 +48,19 @@ const PaymentBusiness = {
       if(tag.id) {
         return tag;
       }
-      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Tag, term: tag.name});
+      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Tag, term: tag.name});
       return {...searchResult, ...tag};
     }));
     if(!data.product.id) {
-      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Product, term: data.product.name});
+      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Product, term: data.product.name});
       data.product = {...data.product, ...searchResult};
     }
     if(!data.category.id) {
-      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Category, term: data.category.name});
+      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Category, term: data.category.name});
       data.category = {...data.category, ...searchResult};
     }
     if(!data.manufacturer.id) {
-      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Manufacturer, term: data.manufacturer.name});
+      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Manufacturer, term: data.manufacturer.name});
       data.manufacturer = {...data.manufacturer, ...searchResult};
     }
     try {
@@ -138,7 +138,7 @@ const choosePaymentType = (customer: {name: string, bank: number, card?: any}): 
   if(card) return PaymentType.Card;
 }
 
-const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) => Promise<Item[]> = async (id, {type, term}) => {
+const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) => Promise<IdName[]> = async (id, {type, term}) => {
   var searchBy = {
     [SearchType.Product]: productsByName,
     [SearchType.Category]: categoriesByName,

@@ -5,7 +5,6 @@ export async function up(knex: Knex): Promise<any> {
     await knex.schema.createTable('manufacturers', function(table) {
         table.increments();
         table.string('name', 30).index().notNullable();
-        table.string('description', 255);
     });
 }
 

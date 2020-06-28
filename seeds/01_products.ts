@@ -6,9 +6,9 @@ export async function seed(knex: Knex): Promise<any> {
         .then(() => {
             // Inserts seed entries
             return knex("products").insert([
-                { name: "Piso", description: "Madeirado Portinari" },
-                { name: "Caixa Papelão", description: "Material avulso" },
-                { name: "Serviço Terceirizado", description: "Construção" },
+                { name: "Piso" },
+                { name: "Caixa Papelão" },
+                { name: "Serviço Terceirizado" },
             ]);
         });
 };

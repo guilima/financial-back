@@ -51,11 +51,11 @@ const routeSchemas = {
         date: date().iso().required().raw(),
         price: number().required(),
         installment: number().required(),
+        description: string().max(255),
       },
       product: {
         name: string().max(30).required(),
-        id: number(),
-        description: string().max(255).required(),
+        id: number()
       },
       category: {
         name: string().max(30).required(),
@@ -68,8 +68,7 @@ const routeSchemas = {
       },
       manufacturer: {
         name: string().max(30).required(),
-        id: number(),
-        description: string().max(255).required(),
+        id: number()
       },
       tags: array().items(string().max(30).required())
     })],
