@@ -1,9 +1,10 @@
 import { Context } from "koa";
-import { WalletData, productsByName, manufacturersByName, categoriesByName, registerPayment, detailByPaymentId, paymentsByWalletId } from "@data/wallet.data"
+import { WalletData, productsByName, manufacturersByName, categoriesByName, registerPayment, detailByPaymentId, paymentsByWalletId, tagsByName } from "@data/wallet.data"
 import { SearchType } from "@enums/search.enum";
 import { PaymentType } from "@root/src/enums/payment.enum";
 import { utc } from "moment";
 
+interface Item {id?: number, name: string, description?: string}
 const WalletBusiness = {
   get: async (ctx: Context) => {
     try {
@@ -25,21 +26,49 @@ const WalletBusiness = {
   },
 }
 
-const addPayment = async (ctx: Context) => {
-  interface Payment {
-    cardId: number,
-    payment: {date: Date, price: string, installment: number, typeId: PaymentType},
-    product: {name: string, description: string},
-    category: {name: string},
-    manufacturer: {name: string, description: string},
-  }
-  const { id } = ctx.params;
-  const { data }: {data: Payment} = ctx.request.body;
-  try {
-    const listWallet = await registerPayment(id, data);
-    return ctx.body = { data: listWallet };
-  } catch (error) {
-    ctx.throw(error);
+const PaymentBusiness = {
+  post: async (ctx: Context) => {
+    interface Payment {
+      payment: {date: Date, price: string, installment: number, typeId: PaymentType},
+      product: Item,
+      category: Item,
+      customer: {id?:number, name: string, bank: number, card?: any},
+      manufacturer: Item,
+      tags: Item[],
+    }
+    const { id } = ctx.params;
+    const request = ctx.request.body;
+    const data: Payment = {
+      ...request,
+      payment: { ...request.payment, typeId: choosePaymentType(request.customer) },
+      tags: request.tags.map((name: string) => ({name}))
+    };
+    
+    data.tags = await Promise.all(data.tags.map(async (tag) => {
+      if(tag.id) {
+        return tag;
+      }
+      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Tag, term: tag.name});
+      return {...searchResult, ...tag};
+    }));
+    if(!data.product.id) {
+      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Product, term: data.product.name});
+      data.product = {...data.product, ...searchResult};
+    }
+    if(!data.category.id) {
+      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Category, term: data.category.name});
+      data.category = {...data.category, ...searchResult};
+    }
+    if(!data.manufacturer.id) {
+      const [searchResult]: Item[] = await searchByTerm(id, {type: SearchType.Manufacturer, term: data.manufacturer.name});
+      data.manufacturer = {...data.manufacturer, ...searchResult};
+    }
+    try {
+      const listWallet = await registerPayment(id, data);
+      return ctx.body = { data: listWallet };
+    } catch (error) {
+      ctx.throw(error);
+    }
   }
 }
 
@@ -47,22 +76,8 @@ const search = async (ctx: Context) => {
   const { id } = ctx.params;
   const { type, term } = ctx.request.body;
   try {
-    let searchByTerm: (id: number, term: string) => Promise<any[]>;
-    switch (type) {
-      case SearchType.Product:
-        searchByTerm = productsByName;
-        break;
-      case SearchType.Category:
-        searchByTerm = categoriesByName;
-        break;
-      case SearchType.Manufacturer:
-        searchByTerm = manufacturersByName;
-        break;
-      default:
-        throw "Busca não existente";
-    }
-    const listProduct = await searchByTerm(id, term);
-    return ctx.body = { data: listProduct };
+    const searchResults = await searchByTerm(id, {type, term});
+    return ctx.body = { data: searchResults };
   } catch (error) {
     ctx.throw(error);
   }
@@ -116,10 +131,28 @@ const detailPayment = async (ctx: Context) => {
   }
 }
 
+const choosePaymentType = (customer: {name: string, bank: number, card?: any}): PaymentType => {
+  const {bank, card} = customer;
+  if(!bank && !card) return PaymentType.Cash;
+  if(bank && !card) return PaymentType["Bank Transference"];
+  if(card) return PaymentType.Card;
+}
+
+const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) => Promise<Item[]> = async (id, {type, term}) => {
+  var searchBy = {
+    [SearchType.Product]: productsByName,
+    [SearchType.Category]: categoriesByName,
+    [SearchType.Manufacturer]: manufacturersByName,
+    [SearchType.Tag]: tagsByName,
+    'default': () => { throw "Busca não existente" }
+  };
+  return await (searchBy[type] || searchBy['default'])(id, term.replace(/\s/g, '&'));
+}
+
 export {
   WalletBusiness,
+  PaymentBusiness,
   search,
-  addPayment,
   walletPayment,
   detailPayment,
 }

@@ -1,5 +1,6 @@
 import { object, array, ref, date, number, string, boolean } from "@hapi/joi";
 import { SearchType } from "@enums/search.enum";
+import { Banks } from "@enums/bank.enum";
 
 const routeSchemas = {
   get: [
@@ -44,6 +45,33 @@ const routeSchemas = {
     ["/wallet", object({
       name: string().max(50).required(),
       description: string().max(255),
+    })],
+    ["/wallet/:id/payment", object({
+      payment: {
+        date: date().iso().required().raw(),
+        price: number().required(),
+        installment: number().required(),
+      },
+      product: {
+        name: string().max(30).required(),
+        id: number(),
+        description: string().max(255).required(),
+      },
+      category: {
+        name: string().max(30).required(),
+        id: number(),
+      },
+      customer: {
+        name: string().max(30).required(),
+        id: number(),
+        bank: number().valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
+      },
+      manufacturer: {
+        name: string().max(30).required(),
+        id: number(),
+        description: string().max(255).required(),
+      },
+      tags: array().items(string().max(30).required())
     })],
   ]
 };
