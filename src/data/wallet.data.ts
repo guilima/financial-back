@@ -57,7 +57,7 @@ const detailByPaymentId = async (id: number) => {
   }
 }
 
-const registerPayment = async (walletId: number, { payment, customer, product, category, manufacturer, tags, }) => {
+const registerPayment = async (walletId: number, { date, price, installment, typeId, customer, product, category, manufacturer, tags, }) => {
   const trxProvider = psqlKnex.transactionProvider();
   const trx = await trxProvider();
   try {
@@ -71,11 +71,11 @@ const registerPayment = async (walletId: number, { payment, customer, product, c
     const [hasCustomer] = await trx('customers').where({name: customer.name});
     const [customerId] = hasCustomer ? [hasCustomer.id] : await trx('customers').insert({name: customer.name}, 'id');
     const [customerBank] = await trx('customers_banks').where('customer_id', customerId).andWhere('bank_id', customer.bank);
-    const [customerBankId] = customerBank.id || customerBank.id === 0 ? [customerBank.id] : await trx('customers_banks').insert({ customer_id: customerId, bank_id: customer.bankId }, 'id');
+    const [customerBankId] = customerBank ? [customerBank.id] : await trx('customers_banks').insert({ customer_id: customerId, bank_id: customer.bank }, 'id');
     if(customer.card) {
       await trx('cards').insert(Object.assign(customer.card, { customer_bank_id: customerBankId }));
     }
-    const [paymentId] = await trx('payments').insert(Object.assign(payment, {wallet_id: walletId, product_manufacturer_id: productManufacturerId, category_id: categoryId, customer_bank_id: customerBankId}), 'id');
+    const [paymentId] = await trx('payments').insert(Object.assign({date, price, installment, typeId}, {wallet_id: walletId, product_manufacturer_id: productManufacturerId, category_id: categoryId, customer_bank_id: customerBankId}), 'id');
     await trx('payments_tags').insert(tagIds.map((tagId: number) => ({ payment_id: paymentId, tag_id: tagId })));
     await trx.commit();
     return paymentId;

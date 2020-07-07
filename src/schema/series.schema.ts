@@ -1,4 +1,4 @@
-import { object, array, ref, date, number, string, boolean } from "@hapi/joi";
+import { object, array, ref, date, number, string, boolean, any } from "@hapi/joi";
 import { SearchType } from "@enums/search.enum";
 import { Banks } from "@enums/bank.enum";
 
@@ -47,12 +47,10 @@ const routeSchemas = {
       description: string().max(255),
     })],
     ["/wallet/:id/payment", object({
-      payment: {
-        date: date().iso().required().raw(),
-        price: number().required(),
-        installment: number().required(),
-        description: string().max(255),
-      },
+      date: date().iso().required().raw(),
+      price: number().required(),
+      installment: number().required(),
+      description: string().max(255).allow(''),
       product: {
         name: string().max(30).required(),
         id: number()
@@ -65,6 +63,7 @@ const routeSchemas = {
         name: string().max(30).required(),
         id: number(),
         bank: number().valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
+        card: any(),
       },
       manufacturer: {
         name: string().max(30).required(),

@@ -29,7 +29,10 @@ const WalletBusiness = {
 const PaymentBusiness = {
   post: async (ctx: Context) => {
     interface Payment {
-      payment: {date: Date, price: string, installment: number, typeId: PaymentType},
+      date: Date,
+      price: string,
+      installment: number,
+      typeId: PaymentType,
       product: IdName,
       category: IdName,
       customer: {id?:number, name: string, bank: number, card?: any},
@@ -37,11 +40,11 @@ const PaymentBusiness = {
       tags: IdName[],
     }
     const { id } = ctx.params;
-    const request = ctx.request.body;
+    const body = ctx.request.body;
     const data: Payment = {
-      ...request,
-      payment: { ...request.payment, typeId: choosePaymentType(request.customer) },
-      tags: request.tags.map((name: string) => ({name}))
+      ...body,
+      typeId: choosePaymentType(body.customer),
+      tags: body.tags.map((name: string) => ({name}))
     };
     
     data.tags = await Promise.all(data.tags.map(async (tag) => {
