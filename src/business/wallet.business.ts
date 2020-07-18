@@ -137,7 +137,7 @@ const detailPayment = async (ctx: Context) => {
 const choosePaymentType = (customer: {name: string, bank: number, card?: any}): PaymentType => {
   const {bank, card} = customer;
   if(!bank && !card) return PaymentType.Cash;
-  if(bank && !card) return PaymentType["Bank Transference"];
+  if(bank && !card) return PaymentType["BankTransference"];
   if(card) return PaymentType.Card;
 }
 

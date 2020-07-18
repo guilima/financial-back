@@ -1,5 +1,5 @@
 export enum PaymentType {        
   "Cash" = 1,
-  "Bank Transference" = 2,
+  "BankTransference" = 2,
   "Card" = 3,
 }
