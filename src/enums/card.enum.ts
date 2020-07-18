@@ -1,6 +1,7 @@
 export enum CardType {        
   "Debit" = 1,
   "Credit" = 2,
+  "DebitCredit" = 3,
 }
 
 export enum CardAssociation {        
