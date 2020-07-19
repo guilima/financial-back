@@ -116,37 +116,32 @@ const cards = async (ctx: Context) => {
 
 const walletPayment = async (ctx: Context) => {
   interface Payment {id: number, date: Date, price: string | number, installment: number, typeId: PaymentType, product: string, manufacturer: string}; 
-  const roundPrice = (price: string | number, installment: number) => (Math.round(((Number(price) / (installment || 1)) + Number.EPSILON) * 100 ) / 100).toFixed(2);
+  const installmentPrice = (price: string | number, installment: number) => (Math.round(((Number(price) / (installment || 1)) + Number.EPSILON) * 100 ) / 100).toFixed(2);
   const { id } = ctx.params;
   try {
     const listPayment: Payment[] = await paymentsByWalletId(id);
-    const listPaymentWithInstallment: {[key: string]: {[key: string]: Payment[]}} = listPayment.reduce((arr, item) => {
-      const price = roundPrice(item.price, item.installment);
-      if(!item.installment) {
-        return arr.concat({...item, price});
-      }
-      for (let i = 1; i <= item.installment; i++) {
-        const date = utc(item.date).add(i, 'M');
-        const installment = `${i}/${item.installment}`;
-        arr = arr.concat({...item, date, installment, price});
-      }
-      return arr;
-    }, [])
-    .sort((a, b) => b.date - a.date)
-    .reduce((obj, item) => {
-      const year = new Date(item.date).getFullYear();
-      const month = new Date(item.date).getMonth();
-      if(!obj[year]) {
-        obj[year] = {}
-      }
-      if(!obj[year][month]) {
-        obj[year][month] = []
-      }
-      obj[year][month] = obj[year][month].concat(item);
-      return obj;
-    }, {});
-    const total: string = roundPrice(listPayment.reduce((num, item) => (num + Number(item.price)), 0), 0);
-    return ctx.body = { data: { payments: listPaymentWithInstallment, total }};
+    const payments: {[key: string]: {[key: string]: Payment[]}} = listPayment
+      .map(item => ({...item, price: installmentPrice(item.price, item.installment)}))
+      .reduce((arr, item) => {
+        for (let i = 1; i <= item.installment; i++) {
+          const date = utc(item.date).add(i, 'M');
+          const installment = `${i}/${item.installment}`;
+          arr = arr.concat({...item, date, installment});
+        }
+        return arr;
+      }, [])
+      .sort((a, b) => b.date - a.date)
+      .reduce((obj, item) => {
+        const year = new Date(item.date).getFullYear();
+        const month = new Date(item.date).getMonth();
+        if(!obj[year]) {
+          obj[year] = {}
+        }
+        obj[year][month] = (obj[year][month] || []).concat(item);
+        return obj;
+      }, {});
+    const total: string = listPayment.reduce((total, { price }) => total + Number(price), 0).toFixed(2);
+    return ctx.body = { data: { payments, total }};
   } catch (error) {
     ctx.throw(error);
   }
