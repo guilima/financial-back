@@ -13,7 +13,7 @@ const WalletData = {
   },
   insert: async (data: {userId: number, name: string, description?: string}) => {
     try {
-      const walletId = await psqlKnex('wallets').insert(data);
+      const [walletId] = await psqlKnex('wallets').insert(data, 'id');
       return walletId;
     } catch (err) {
       throw err;

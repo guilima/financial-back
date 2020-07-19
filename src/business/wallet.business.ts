@@ -20,7 +20,7 @@ const WalletBusiness = {
     const userId: number = ctx.state.user.sub;
     try {
       const id = await WalletData.insert({...data, userId});
-      return ctx.body = { data: id };
+      return ctx.body = { data: {id, ...data} };
     } catch (error) {
       ctx.throw(error);
     }
