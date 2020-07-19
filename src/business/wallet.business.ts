@@ -1,7 +1,8 @@
 import { Context } from "koa";
-import { WalletData, productsByName, manufacturersByName, categoriesByName, registerPayment, detailByPaymentId, paymentsByWalletId, tagsByName } from "@data/wallet.data"
+import { WalletData, productsByName, manufacturersByName, categoriesByName, registerPayment, detailByPaymentId, paymentsByWalletId, tagsByName, customersByName, cardsByCustomerId } from "@data/wallet.data"
 import { SearchType } from "@enums/search.enum";
 import { PaymentType } from "@root/src/enums/payment.enum";
+import { CardType, CardAssociation } from "@root/src/enums/card.enum";
 import { utc } from "moment";
 
 interface IdName {id?: number, name: string}
@@ -35,16 +36,29 @@ const PaymentBusiness = {
       typeId: PaymentType,
       product: IdName,
       category: IdName,
-      customer: {id?:number, name: string, bank: number, card?: any},
+      customer: {id?:number, name: string, bank: number, card?: {due?: number, close?: number, type: CardType, association: CardAssociation} | {id: number}},
       manufacturer: IdName,
       tags: IdName[],
     }
     const { id } = ctx.params;
-    const body = ctx.request.body;
+    const { body, body: { tags, customer, customer: { card, card: { info: { closingDate, dueDate } } } } } = ctx.request;
+    const typeId = choosePaymentType(customer);
+    let customerCard = undefined;
+    if(typeId === PaymentType.Card) {
+      customerCard = card.new ? {
+        ...card.info,
+        closingDate: utc().set({month: 0, date: closingDate, h:0, m:0, s:0, ms:0}),
+        dueDate: utc().set({month: 0, date: dueDate, h:0, m:0, s:0, ms:0}),
+      } : { id: card.id };
+    }
     const data: Payment = {
       ...body,
-      typeId: choosePaymentType(body.customer),
-      tags: body.tags.map((name: string) => ({name}))
+      typeId,
+      tags: tags.map((name: string) => ({name})),
+      customer: {
+        ...customer,
+        card: customerCard
+      }
     };
     
     data.tags = await Promise.all(data.tags.map(async (tag) => {
@@ -66,6 +80,10 @@ const PaymentBusiness = {
       const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Manufacturer, term: data.manufacturer.name});
       data.manufacturer = {...data.manufacturer, ...searchResult};
     }
+    if(!data.customer.id) {
+      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Customer, term: data.customer.name});
+      data.customer = {...data.customer, ...searchResult};
+    }
     try {
       const listWallet = await registerPayment(id, data);
       return ctx.body = { data: listWallet };
@@ -80,6 +98,16 @@ const search = async (ctx: Context) => {
   const { type, term } = ctx.request.body;
   try {
     const searchResults = await searchByTerm(id, {type, term});
+    return ctx.body = { data: searchResults };
+  } catch (error) {
+    ctx.throw(error);
+  }
+}
+
+const cards = async (ctx: Context) => {
+  const params = ctx.request.body;
+  try {
+    const searchResults = await cardsByCustomerId(params);
     return ctx.body = { data: searchResults };
   } catch (error) {
     ctx.throw(error);
@@ -136,9 +164,9 @@ const detailPayment = async (ctx: Context) => {
 
 const choosePaymentType = (customer: {name: string, bank: number, card?: any}): PaymentType => {
   const {bank, card} = customer;
-  if(!bank && !card) return PaymentType.Cash;
-  if(bank && !card) return PaymentType["BankTransference"];
-  if(card) return PaymentType.Card;
+  if(card.id || card.new) return PaymentType.Card;
+  if(bank) return PaymentType.BankTransference;
+  return PaymentType.Cash;
 }
 
 const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) => Promise<IdName[]> = async (id, {type, term}) => {
@@ -147,6 +175,7 @@ const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) 
     [SearchType.Category]: categoriesByName,
     [SearchType.Manufacturer]: manufacturersByName,
     [SearchType.Tag]: tagsByName,
+    [SearchType.Customer]: customersByName,
     'default': () => { throw "Busca não existente" }
   };
   return await (searchBy[type] || searchBy['default'])(id, term.replace(/\s/g, '&'));
@@ -158,4 +187,5 @@ export {
   search,
   walletPayment,
   detailPayment,
+  cards,
 }

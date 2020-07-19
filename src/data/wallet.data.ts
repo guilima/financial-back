@@ -23,8 +23,9 @@ const WalletData = {
 
 const paymentsByWalletId = async (id: number) => {
   try {
-    const listPayment = await psqlKnex.select('PAY.id', 'PAY.date', 'PAY.price', 'PAY.installment', 'PAY.type_id', psqlKnex.raw('to_json(PRO.name) as product'), psqlKnex.raw('to_json(CAT.name) as category'), psqlKnex.raw('to_json(MAN.name) as manufacturer'))
+    const listPayment = await psqlKnex.select('PAY.id', 'PAY.date', 'PAY.price', 'PAY.installment', 'TRA.type_id', psqlKnex.raw('to_json(PRO.name) as product'), psqlKnex.raw('to_json(CAT.name) as category'), psqlKnex.raw('to_json(MAN.name) as manufacturer'))
       .from('payments AS PAY')
+      .innerJoin('transactions AS TRA', 'TRA.id', '=', 'PAY.id')
       .innerJoin('products_manufacturers AS PROMAN', 'PROMAN.id', '=', 'PAY.product_manufacturer_id')
       .innerJoin('products AS PRO', 'PRO.id', '=', 'PROMAN.product_id')
       .innerJoin('manufacturers AS MAN', 'MAN.id', '=', 'PROMAN.manufacturer_id')
@@ -39,16 +40,17 @@ const paymentsByWalletId = async (id: number) => {
 
 const detailByPaymentId = async (id: number) => {
   try {
-    const detailPayment = await psqlKnex.select('PAY.date', 'PAY.price', 'PAY.installment', 'PAY.type_id', 'PRO.id', 'PRO.name', 'CUSBAN.bank_id', psqlKnex.raw('to_json(MAN.*) as manufacturer'), psqlKnex.raw('to_json(CAT.*) as category'), psqlKnex.raw('to_json(TAG.*) as tag'), psqlKnex.raw('to_json(CUS.*) as customer'), psqlKnex.raw('to_json(CAR.*) as card'))
+    const detailPayment = await psqlKnex.select('PAY.date', 'PAY.price', 'PAY.installment', 'PRO.id', 'PRO.name', 'TRA.bank_id', 'TRA.type_id', psqlKnex.raw('to_json(MAN.*) as manufacturer'), psqlKnex.raw('to_json(CAT.*) as category'), psqlKnex.raw('to_json(TAG.*) as tag'), psqlKnex.raw('to_json(CUS.*) as customer'), psqlKnex.raw('to_json(CAR.*) as card'))
       .from('payments AS PAY')
       .innerJoin('products_manufacturers AS PROMAN', 'PROMAN.id', '=', 'PAY.product_manufacturer_id')
       .innerJoin('products AS PRO', 'PRO.id', '=', 'PROMAN.product_id')
       .innerJoin('manufacturers AS MAN', 'MAN.id', '=', 'PROMAN.manufacturer_id')
-      .innerJoin('customers_banks AS CUSBAN', 'CUSBAN.id', '=', 'PAY.customer_bank_id')
-      .leftJoin('customers AS CUS', 'CUS.id', '=', 'CUSBAN.customer_id')
-      .leftJoin('cards AS CAR', 'CAR.customer_bank_id', '=', 'CUSBAN.id')
+      .innerJoin('transactions AS TRA', 'TRA.payment_id', '=', 'PAY.id')
+      .leftJoin('transactions_cards AS TRACAR', 'TRACAR.transaction_id', '=', 'TRA.id')
+      .leftJoin('customers AS CUS', 'CUS.id', '=', 'TRA.customer_id')
+      .leftJoin('cards AS CAR', 'CAR.id', '=', 'TRACAR.card_id')
       .leftJoin('payments_tags AS PAYTAG', 'PAY.id', '=', 'PAYTAG.payment_id')
-      .leftJoin('tags AS TAG', 'TAG.id', '=', 'PAYTAG.manufacturer_id')
+      .leftJoin('tags AS TAG', 'TAG.id', '=', 'PAYTAG.payment_id')
       .leftJoin('categories AS CAT', 'CAT.id', '=', 'PAY.category_id')
       .where('PAY.id', '=', id).first();
     return detailPayment;
@@ -70,12 +72,12 @@ const registerPayment = async (walletId: number, { date, price, installment, typ
     const [productManufacturerId] = productManufacturer ? [productManufacturer.id] : await trx('products_manufacturers').insert({ product_id: productId, manufacturer_id: manufacturerId }, 'id');
     const [hasCustomer] = await trx('customers').where({name: customer.name});
     const [customerId] = hasCustomer ? [hasCustomer.id] : await trx('customers').insert({name: customer.name}, 'id');
-    const [customerBank] = await trx('customers_banks').where('customer_id', customerId).andWhere('bank_id', customer.bank);
-    const [customerBankId] = customerBank ? [customerBank.id] : await trx('customers_banks').insert({ customer_id: customerId, bank_id: customer.bank }, 'id');
+    const [paymentId] = await trx('payments').insert(Object.assign({date, price, installment}, {wallet_id: walletId, product_manufacturer_id: productManufacturerId, category_id: categoryId}), 'id');
+    const [transactionId] = await trx('transactions').insert({bank_id: customer.bank, paymentId, customerId, typeId}, 'id');
     if(customer.card) {
-      await trx('cards').insert(Object.assign(customer.card, { customer_bank_id: customerBankId }));
+      const [cardId] = (customer.card.id && [customer.card.id]) || await trx('cards').insert(customer.card, 'id');
+      await trx('transactions_cards').insert({transactionId, cardId});
     }
-    const [paymentId] = await trx('payments').insert(Object.assign({date, price, installment, typeId}, {wallet_id: walletId, product_manufacturer_id: productManufacturerId, category_id: categoryId, customer_bank_id: customerBankId}), 'id');
     await trx('payments_tags').insert(tagIds.map((tagId: number) => ({ payment_id: paymentId, tag_id: tagId })));
     await trx.commit();
     return paymentId;
@@ -140,6 +142,35 @@ const tagsByName = async (walletId: number, name: string) => {
   }
 }
 
+const customersByName = async (walletId: number, name: string) => {
+  try {
+    const categories = await psqlKnex.distinct('CUS.*')
+      .from('payments AS PAY')
+      .leftJoin('transactions AS TRA', 'TRA.payment_id', '=', 'PAY.id')
+      .leftJoin('customers AS CUS', 'CUS.id', '=', 'TRA.customer_id')
+      .whereRaw("PAY.wallet_id = ? AND to_tsquery('simple', '??:*') @@ to_tsvector('simple', CUS.name)", [walletId, name])
+      .limit(10);
+    return categories;
+  } catch (err) {
+    throw err;
+  }
+}
+
+const cardsByCustomerId = async ({customerId, bankId}) => {
+  try {
+    const categories = await psqlKnex.distinct('CAR.*')
+      .from('transactions AS TRA')
+      .rightJoin('transactions_cards AS TRACAR', 'TRACAR.transaction_id', '=', 'TRA.id')
+      .leftJoin('cards AS CAR', 'CAR.id', '=', 'TRACAR.card_id')
+      .where('TRA.customer_id', customerId)
+      .andWhere('TRA.bank_id', bankId)
+      .limit(10);
+    return categories;
+  } catch (err) {
+    throw err;
+  }
+}
+
 export {
     WalletData,
     paymentsByWalletId,
@@ -149,4 +180,6 @@ export {
     manufacturersByName,
     categoriesByName,
     tagsByName,
+    customersByName,
+    cardsByCustomerId,
 }

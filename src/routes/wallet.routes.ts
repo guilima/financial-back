@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { WalletBusiness, search, PaymentBusiness, detailPayment, walletPayment } from '@business/wallet.business';
+import { WalletBusiness, search, PaymentBusiness, detailPayment, walletPayment, cards } from '@business/wallet.business';
 import { DefaultState, Context } from 'koa';
 import jwt from '@middleware/authValidator';
 import authRenewer from '@middleware/authRenewer';
@@ -10,6 +10,7 @@ routes
   .post('/wallet', jwt, authRenewer, WalletBusiness.post)
   .get('/wallet/:id', jwt, authRenewer, walletPayment)
   .post('/wallet/:id/payment', jwt, authRenewer, PaymentBusiness.post)
+  .get('/cards', jwt, authRenewer, cards)
   .get('/wallet/:id/search', jwt, authRenewer, search)
   .get('/wallet/:id/payment/:id', jwt, authRenewer, detailPayment);
 
