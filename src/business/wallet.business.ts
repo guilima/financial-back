@@ -123,6 +123,9 @@ const walletPayment = async (ctx: Context) => {
     const payments: {[key: string]: {[key: string]: Payment[]}} = listPayment
       .map(item => ({...item, price: installmentPrice(item.price, item.installment)}))
       .reduce((arr, item) => {
+        if(!item.installment) {
+          return arr.concat(item);
+        }
         for (let i = 1; i <= item.installment; i++) {
           const date = utc(item.date).add(i, 'M');
           const installment = `${i}/${item.installment}`;
