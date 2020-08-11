@@ -137,9 +137,7 @@ const walletPayment = async (ctx: Context) => {
       .reduce((obj, item) => {
         const year = new Date(item.date).getFullYear();
         const month = new Date(item.date).getMonth();
-        if(!obj[year]) {
-          obj[year] = {}
-        }
+        obj[year] = obj[year] || {};
         obj[year][month] = (obj[year][month] || []).concat(item);
         return obj;
       }, {});
