@@ -6,6 +6,18 @@ import { CardType, CardAssociation } from "@root/src/enums/card.enum";
 import { utc } from "moment";
 
 interface IdName {id?: number, name: string}
+interface Card {typeId: CardType, associationId: CardAssociation, id?: number, dueDate?: Date, closingDate?: Date};
+interface Payment {
+  date: Date,
+  price: string,
+  installment: number,
+  typeId: PaymentType,
+  product: IdName,
+  category: IdName,
+  customer: {id?:number, name: string, bank: number, card?: Card},
+  manufacturer: IdName,
+  tags: IdName[],
+}
 const WalletBusiness = {
   get: async (ctx: Context) => {
     try {
@@ -29,64 +41,22 @@ const WalletBusiness = {
 
 const PaymentBusiness = {
   post: async (ctx: Context) => {
-    interface Payment {
-      date: Date,
-      price: string,
-      installment: number,
-      typeId: PaymentType,
-      product: IdName,
-      category: IdName,
-      customer: {id?:number, name: string, bank: number, card?: {due?: number, close?: number, type: CardType, association: CardAssociation} | {id: number}},
-      manufacturer: IdName,
-      tags: IdName[],
-    }
     const { id } = ctx.params;
-    const { body, body: { tags, customer, customer: { card, card: { info: { closingDate, dueDate } } } } } = ctx.request;
-    const typeId = choosePaymentType(customer);
-    let customerCard = undefined;
-    if(typeId === PaymentType.Card) {
-      customerCard = card.new ? {
-        ...card.info,
-        closingDate: utc().set({month: 0, date: closingDate, h:0, m:0, s:0, ms:0}),
-        dueDate: utc().set({month: 0, date: dueDate, h:0, m:0, s:0, ms:0}),
-      } : { id: card.id };
-    }
-    const data: Payment = {
-      ...body,
-      typeId,
-      tags: tags.map((name: string) => ({name})),
-      customer: {
-        ...customer,
-        card: customerCard
-      }
-    };
-    
-    data.tags = await Promise.all(data.tags.map(async (tag) => {
-      if(tag.id) {
-        return tag;
-      }
-      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Tag, term: tag.name});
-      return {...searchResult, ...tag};
-    }));
-    if(!data.product.id) {
-      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Product, term: data.product.name});
-      data.product = {...data.product, ...searchResult};
-    }
-    if(!data.category.id) {
-      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Category, term: data.category.name});
-      data.category = {...data.category, ...searchResult};
-    }
-    if(!data.manufacturer.id) {
-      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Manufacturer, term: data.manufacturer.name});
-      data.manufacturer = {...data.manufacturer, ...searchResult};
-    }
-    if(!data.customer.id) {
-      const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Customer, term: data.customer.name});
-      data.customer = {...data.customer, ...searchResult};
-    }
+    const { body } = ctx.request;
     try {
-      const listWallet = await registerPayment(id, data);
-      return ctx.body = { data: listWallet };
+      if(Array.isArray(body)) {
+        const data = body.reduce(async (acc, payment) => {
+          return [
+            ...(await acc),
+            await registerPayment(id, await formatPayment(id, payment))
+          ];
+        }, []);
+        return ctx.body = { data: await data };
+      } else {
+        const paymentFormatted: Payment = await formatPayment(id, body);
+        const data = await registerPayment(id, paymentFormatted);
+        return ctx.body = { data };
+      }
     } catch (error) {
       ctx.throw(error);
     }
@@ -175,6 +145,62 @@ const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) 
     'default': () => { throw "Busca não existente" }
   };
   return await (searchBy[type] || searchBy['default'])(id, term.replace(/[!@#$%^&*()+=\-[\]\\';,./{}|":<>?~_|\s]/g, '\\$&'));
+}
+
+const formatPayment = async (id: number, payment): Promise<Payment> => {
+  const { tags, customer, customer: { card, card: { info: { closingDate, dueDate } } } } = payment;
+  const paymentTypeId = choosePaymentType(customer);
+  let customerCard = undefined;
+  if(paymentTypeId === PaymentType.Card) {
+    customerCard = card.new ? {
+      ...card.info,
+      closingDate: utc().set({month: 0, date: closingDate, h:0, m:0, s:0, ms:0}),
+      dueDate: utc().set({month: 0, date: dueDate, h:0, m:0, s:0, ms:0}),
+    } : { id: card.id };
+  }
+  const data: Payment = {
+    ...payment,
+    typeId: paymentTypeId,
+    tags: tags.map((name: string) => ({name})),
+    customer: {
+      ...customer,
+      card: customerCard
+    }
+  };
+
+  data.tags = await Promise.all(data.tags.map(async (tag) => {
+    if(tag.id) {
+      return tag;
+    }
+    const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Tag, term: tag.name});
+    return {...searchResult, ...tag};
+  }));
+  if(!data.product.id) {
+    const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Product, term: data.product.name});
+    data.product = {...data.product, ...searchResult};
+  }
+  if(!data.category.id) {
+    const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Category, term: data.category.name});
+    data.category = {...data.category, ...searchResult};
+  }
+  if(!data.manufacturer.id) {
+    const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Manufacturer, term: data.manufacturer.name});
+    data.manufacturer = {...data.manufacturer, ...searchResult};
+  }
+  if(!data.customer.id) {
+    const [searchResult]: IdName[] = await searchByTerm(id, {type: SearchType.Customer, term: data.customer.name});
+    data.customer = {...data.customer, ...searchResult};
+  }
+  if(paymentTypeId === PaymentType.Card && !data.customer.card.id && data.customer.id) {
+    const searchResults: Card[] = await cardsByCustomerId({customerId: data.customer.id, bankId: data.customer.bank});
+    const cardResult = searchResults.find((result) => Number(closingDate) === result.closingDate.getDate()
+      && Number(dueDate) === result.dueDate.getDate()
+      && Number(card.info.associationId) === result.associationId
+      && Number(card.info.typeId) === result.typeId) || {id: undefined };
+    data.customer.card = {...data.customer.card, ...cardResult};
+  }
+
+  return data;
 }
 
 export {

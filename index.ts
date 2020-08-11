@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import bodyParser from 'koa-bodyparser';
+import bodyParser from 'koa-body';
 import cors from '@koa/cors';
 import router from './src/routes/index';
 import session from 'koa-session';
@@ -15,7 +15,7 @@ app.use(session({
   store: redisStore
 }, app));
 app.proxy = true;
-app.use(bodyParser())
+app.use(bodyParser({multipart: true, urlencoded: true}))
   .use(cors({
     origin: appCors,
     allowHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
