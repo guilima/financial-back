@@ -1,4 +1,5 @@
 import { ObjectSchema } from "@hapi/joi";
+import { Layer } from "@koa/router";
 import { routeSchemas } from "@schema/series.schema";
 import { Context, Next, Middleware } from "koa";
 
@@ -6,7 +7,8 @@ export default async (ctx: Context, next: Next): Promise<Middleware> => {
   const { query, method, body } = ctx.request;
   const payload = method === 'GET' ? query : body;
   const schemas: Map<string, ObjectSchema> = new Map(routeSchemas[method.toLocaleLowerCase()]);
-  const schema = schemas.get(ctx._matchedRoute);
+  const { path } = (ctx.matched as Layer[]).find(match => match.methods.includes(method)) || { path: undefined };
+  const schema = schemas.get(path);
 
   const { error, value } = schema.validate(payload);
 
