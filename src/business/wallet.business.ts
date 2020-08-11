@@ -174,7 +174,7 @@ const searchByTerm: (id: number, {type, term}:{type: SearchType, term: string}) 
     [SearchType.Customer]: customersByName,
     'default': () => { throw "Busca não existente" }
   };
-  return await (searchBy[type] || searchBy['default'])(id, term.replace(/\s/g, '&'));
+  return await (searchBy[type] || searchBy['default'])(id, term.replace(/[!@#$%^&*()+=\-[\]\\';,./{}|":<>?~_|\s]/g, '\\$&'));
 }
 
 export {
