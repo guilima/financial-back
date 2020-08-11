@@ -1,9 +1,6 @@
 import * as Knex from "knex";
 
 export async function seed(knex: Knex): Promise<any> {
-    'date'
-'order'
-'price'
     // Deletes ALL existing entries
     return knex("wallets").del()
         .then(() => {
