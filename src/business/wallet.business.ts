@@ -154,8 +154,8 @@ const formatPayment = async (id: number, payment): Promise<Payment> => {
   if(paymentTypeId === PaymentType.Card) {
     customerCard = card.new ? {
       ...card.info,
-      closingDate: utc().set({month: 0, date: closingDate, h:0, m:0, s:0, ms:0}),
-      dueDate: utc().set({month: 0, date: dueDate, h:0, m:0, s:0, ms:0}),
+      closingDate: closingDate && utc().set({month: 0, date: closingDate, h:0, m:0, s:0, ms:0}),
+      dueDate: dueDate && utc().set({month: 0, date: dueDate, h:0, m:0, s:0, ms:0}),
     } : { id: card.id };
   }
   const data: Payment = {
@@ -193,8 +193,8 @@ const formatPayment = async (id: number, payment): Promise<Payment> => {
   }
   if(paymentTypeId === PaymentType.Card && !data.customer.card.id && data.customer.id) {
     const searchResults: Card[] = await cardsByCustomerId({customerId: data.customer.id, bankId: data.customer.bank});
-    const cardResult = searchResults.find((result) => Number(closingDate) === result.closingDate.getDate()
-      && Number(dueDate) === result.dueDate.getDate()
+    const cardResult = searchResults.find((result) => Number(closingDate) || null === (result.closingDate && result.closingDate.getDate())
+      && Number(dueDate) || null === (result.dueDate && result.dueDate.getDate())
       && Number(card.info.associationId) === result.associationId
       && Number(card.info.typeId) === result.typeId) || {id: undefined };
     data.customer.card = {...data.customer.card, ...cardResult};
