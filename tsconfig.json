@@ -22,7 +22,6 @@
       "esModuleInterop": true
     },
     "include": [
-      "index.ts",
-      "update-monthly.scheduled.ts"
+      "index.ts"
     ]
 }
