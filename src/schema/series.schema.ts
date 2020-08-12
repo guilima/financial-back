@@ -1,4 +1,41 @@
-import { object, array, ref, date, number, string, boolean } from "@hapi/joi";
+import { object, array, ref, date, number, string, boolean, when } from "@hapi/joi";
+import { SearchType } from "@enums/search.enum";
+import { Banks } from "@enums/bank.enum";
+
+const payment = object({
+  date: date().iso().required().raw(),
+  price: number().required(),
+  installment: number().required(),
+  description: string().allow('').allow(null).default('').max(255),
+  product: object({
+    name: string().required().max(100),
+    id: number().optional()
+  }).required(),
+  category: object({
+    name: string().required().max(30),
+    id: number().optional(),
+  }).required(),
+  customer: object({
+    name: string().max(30).required(),
+    id: number().optional(),
+    bank: number().default(0).valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
+    card: object({
+      new: boolean().required(),
+      id: number().optional(),
+      info: when('new', {is: true, then: object({
+        dueDate: number(),
+        closingDate: number(),
+        typeId: number().required(),
+        associationId: number().required()
+      }).required(), otherwise: object().default({})})
+    }).optional(),
+  }).required(),
+  manufacturer: object({
+    name: string().max(30).required(),
+    id: number().optional()
+  }).required(),
+  tags: array().items(string().max(30))
+});
 
 const routeSchemas = {
   get: [
@@ -9,7 +46,18 @@ const routeSchemas = {
     })],
     ["/userExist", object({
       email: string().email({ tlds: { allow: false } }).required()
-    })]
+    })],
+    ["/wallet", object({})],
+    ["/wallet/:id", object({})],
+    ["/wallet/:id/search", object({
+      type: number().valid(...Object.values(SearchType).filter(item => Number.isInteger(item))),
+      term: string().required()
+    })],
+    ["/wallet/:id/payment/:id", object({})],
+    ["/cards", object({
+      customerId: number().required(),
+      bankId: number().required(),
+    })],
   ],
   post: [
     ["/series", object({
@@ -32,7 +80,13 @@ const routeSchemas = {
       fullName: string().max(100).required(),
       email: string().email({ tlds: { allow: false } }).max(256).required(),
       password: string().required()
-    })]
+    })],
+    ["/wallet", object({
+      name: string().max(50).required(),
+      description: string().max(255),
+    })],
+    ["/wallet/:id/import", array().items(payment)],
+    ["/wallet/:id/payment", payment],
   ]
 };
 const IGetValoresSeriesJSONResponse = array().items(

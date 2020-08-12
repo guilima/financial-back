@@ -8,5 +8,6 @@ export const postgresConfig: Knex.Config = {
   connection: postgresURI,
   ...knexSnakeCaseMappers()
 };
-export const postgres = async(): Promise<Knex> => Knex(postgresConfig);
+
+export const psqlKnex = Knex(postgresConfig);
 export const redisStore = Redis({url: redisURI});

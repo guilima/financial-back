@@ -1,9 +1,8 @@
-import { postgres } from '../../db';
+import { psqlKnex } from '@root/db';
 
 const userFindByEmail = async (email: string) => {
-  const knex = await postgres();
   try {
-    const user = await knex('users').select('*')
+    const user = await psqlKnex('users').select('*')
       .whereNull('deleted_at')
       .andWhere('email', '=', email);
     return user[0];

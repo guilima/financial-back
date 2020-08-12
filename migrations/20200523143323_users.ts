@@ -7,8 +7,8 @@ export async function up(knex: Knex): Promise<any> {
         table.string('user_name', 30);
         table.string('full_name', 100);
         table.string('email', 320).notNullable();
-        table.boolean('email_verified').defaultTo(false);
-        table.specificType('created_at', 'timestamp').defaultTo(knex.fn.now());
+        table.boolean('email_verified').defaultTo(false).notNullable();
+        table.specificType('created_at', 'timestamp').defaultTo(knex.fn.now()).notNullable();
         table.specificType('deleted_at', 'timestamp');
     });
 
