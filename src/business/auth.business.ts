@@ -4,15 +4,11 @@ import { authLogin, authUpdateLogin, authRegister } from '@data/auth.data';
 import { jwtSecret, jwtRefreshSecret } from '@root/config';
 import { redisStore } from '@root/db';
 import JwToken from '@utils/jwt.utils';
-import GoogleRecaptchaAPI from '@services/googleRecaptcha.service';
 
-const googleRecaptchaAPI = new GoogleRecaptchaAPI();
 const jwToken = new JwToken();
 
 const login = async (ctx: Context) => {
-  const { email, password, recaptchaToken } = ctx.request.body;
-  const googleRecaptchaVerify = await googleRecaptchaAPI.siteVerify(recaptchaToken);
-  if (!googleRecaptchaVerify.success) ctx.throw(401, `Recaptcha Token Inválido`, googleRecaptchaVerify);
+  const { email, password } = ctx.request.body;
   const user = await authLogin(email);
   if (!user) ctx.throw(403, `Email não cadastrado`);
   const isVerifiedPassword = scryptSync(password, user.passwordSalt, 64, { N: 1024 }).toString('hex') === user.passwordHash;
@@ -41,8 +37,6 @@ const logout = async (ctx: Context) => {
 
 const register = async (ctx: Context) => {
   const { fullName, userName, email, password, recaptchaToken } = ctx.request.body;
-  const googleRecaptchaVerify = await googleRecaptchaAPI.siteVerify(recaptchaToken);
-  if(!googleRecaptchaVerify.success) ctx.throw(401, `Recaptcha Token Inválido`, googleRecaptchaVerify);
   const passwordSalt = randomBytes(32);
   const passwordHash = scryptSync(password, passwordSalt, 64, {N:1024}).toString('hex');
   const param = {
