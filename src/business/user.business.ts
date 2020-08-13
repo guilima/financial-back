@@ -2,10 +2,11 @@ import { Context } from "koa";
 import { userFindByEmail } from "@data/user.data"
 
 const userExist = async (ctx: Context) => {
-  const { email } = ctx.request.body;
+  const request: { email: string } = ctx.request.body;
   try {
-    const data = await userFindByEmail(email);
-    return ctx.body = { data: data && data.id ? true : false };
+    const { id } = await userFindByEmail(request.email) || { id: undefined };
+    const response = Boolean(id);
+    return ctx.body = { data: response };
   } catch (error) {
     ctx.throw(error);
   }
