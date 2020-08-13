@@ -20,19 +20,21 @@ interface Payment {
 }
 const WalletBusiness = {
   get: async (ctx: Context) => {
+    const userId: number = ctx.state.user.sub;
     try {
-      const listWallet = await WalletData.selectByUserId(ctx.state.user.sub);
+      const listWallet = await WalletData.selectByUserId(userId);
       return ctx.body = { data: listWallet };
     } catch (error) {
       ctx.throw(error);
     }
   },
   post: async (ctx: Context) => {
-    const data: {name: string, description?: string} = ctx.request.body;
+    const request: {name: string, description?: string} = ctx.request.body;
     const userId: number = ctx.state.user.sub;
     try {
-      const id = await WalletData.insert({...data, userId});
-      return ctx.body = { data: {id, ...data} };
+      const id = await WalletData.insert({...request, userId});
+      const response = { id, ...request};
+      return ctx.body = { data: response };
     } catch (error) {
       ctx.throw(error);
     }
@@ -41,21 +43,21 @@ const WalletBusiness = {
 
 const PaymentBusiness = {
   post: async (ctx: Context) => {
+    const request = ctx.request.body;
     const { id } = ctx.params;
-    const { body } = ctx.request;
     try {
-      if(Array.isArray(body)) {
-        const data = body.reduce(async (acc, payment) => {
+      if(Array.isArray(request)) {
+        const response = request.reduce(async (acc, payment) => {
           return [
             ...(await acc),
             await registerPayment(id, await formatPayment(id, payment))
           ];
         }, []);
-        return ctx.body = { data: await data };
+        return ctx.body = { data: await response };
       } else {
-        const paymentFormatted: Payment = await formatPayment(id, body);
-        const data = await registerPayment(id, paymentFormatted);
-        return ctx.body = { data };
+        const paymentFormatted = await formatPayment(id, request);
+        const response = await registerPayment(id, paymentFormatted);
+        return ctx.body = { data: response };
       }
     } catch (error) {
       ctx.throw(error);
@@ -64,21 +66,21 @@ const PaymentBusiness = {
 }
 
 const search = async (ctx: Context) => {
+  const request: { type: number, term: string } = ctx.request.body;
   const { id } = ctx.params;
-  const { type, term } = ctx.request.body;
   try {
-    const searchResults = await searchByTerm(id, {type, term});
-    return ctx.body = { data: searchResults };
+    const response = await searchByTerm(id, request);
+    return ctx.body = { data: response };
   } catch (error) {
     ctx.throw(error);
   }
 }
 
 const cards = async (ctx: Context) => {
-  const params = ctx.request.body;
+  const request: { customerId: number, bankId: number } = ctx.request.body;
   try {
-    const searchResults = await cardsByCustomerId(params);
-    return ctx.body = { data: searchResults };
+    const response = await cardsByCustomerId(request);
+    return ctx.body = { data: response };
   } catch (error) {
     ctx.throw(error);
   }
@@ -86,8 +88,8 @@ const cards = async (ctx: Context) => {
 
 const walletPayment = async (ctx: Context) => {
   interface Payment {id: number, date: Date, price: string | number, installment: number, typeId: PaymentType, product: string, manufacturer: string}; 
-  const installmentPrice = (price: string | number, installment: number) => (Math.round(((Number(price) / (installment || 1)) + Number.EPSILON) * 100 ) / 100).toFixed(2);
   const { id } = ctx.params;
+  const installmentPrice = (price: string | number, installment: number) => (Math.round(((Number(price) / (installment || 1)) + Number.EPSILON) * 100 ) / 100).toFixed(2);
   try {
     const listPayment: Payment[] = await paymentsByWalletId(id);
     const payments: {[key: string]: {[key: string]: Payment[]}} = listPayment
@@ -112,7 +114,8 @@ const walletPayment = async (ctx: Context) => {
         return obj;
       }, {});
     const total: string = listPayment.reduce((total, { price }) => total + Number(price), 0).toFixed(2);
-    return ctx.body = { data: { payments, total }};
+    const response = { payments, total };
+    return ctx.body = { data: response};
   } catch (error) {
     ctx.throw(error);
   }
@@ -121,8 +124,8 @@ const walletPayment = async (ctx: Context) => {
 const detailPayment = async (ctx: Context) => {
   const { id } = ctx.params;
   try {
-    const payment = await detailByPaymentId(id);
-    return ctx.body = { data: payment };
+    const response = await detailByPaymentId(id);
+    return ctx.body = { data: response };
   } catch (error) {
     ctx.throw(error);
   }

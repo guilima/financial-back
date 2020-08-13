@@ -8,10 +8,10 @@ import JwToken from '@utils/jwt.utils';
 const jwToken = new JwToken();
 
 const login = async (ctx: Context) => {
-  const { email, password } = ctx.request.body;
-  const user = await authLogin(email);
+  const request: { email: string, password: string } = ctx.request.body;
+  const user = await authLogin(request.email);
   if (!user) ctx.throw(403, `Email não cadastrado`);
-  const isVerifiedPassword = scryptSync(password, user.passwordSalt, 64, { N: 1024 }).toString('hex') === user.passwordHash;
+  const isVerifiedPassword = scryptSync(request.password, user.passwordSalt, 64, { N: 1024 }).toString('hex') === user.passwordHash;
   if (!isVerifiedPassword) ctx.throw(401, `Senha inválida`);
   const tokenAccess = jwToken.sign({
     sub: user.id,
@@ -36,14 +36,14 @@ const logout = async (ctx: Context) => {
 }
 
 const register = async (ctx: Context) => {
-  const { fullName, userName, email, password, recaptchaToken } = ctx.request.body;
+  const request: { fullName: string, userName: string, email: string, password: string } = ctx.request.body;
   const passwordSalt = randomBytes(32);
-  const passwordHash = scryptSync(password, passwordSalt, 64, {N:1024}).toString('hex');
+  const passwordHash = scryptSync(request.password, passwordSalt, 64, {N:1024}).toString('hex');
   const param = {
     user: {
-      userName,
-      fullName,
-      email
+      fullName: request.fullName,
+      email: request.email,
+      userName: request.userName
     },
     login: {
       passwordHash,
@@ -56,7 +56,7 @@ const register = async (ctx: Context) => {
 
   const tokenAccess = jwToken.sign({
     sub: userId,
-    name: fullName,
+    name: request.fullName,
     admin: false
   }, jwtSecret, '7 days');
   const tokenRefresh = jwToken.sign({ sub: userId }, jwtRefreshSecret, '30 days');
