@@ -1,4 +1,4 @@
-import { ObjectSchema } from "@hapi/joi";
+import { ObjectSchema } from "joi";
 import { routeSchemas } from "@schema/series.schema";
 import { Context, Next, Middleware } from "koa";
 

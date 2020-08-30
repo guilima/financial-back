@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Node API structure connection to postgreSQL / redis",
   "engines": {
-    "node": "12.x"
+    "node": "14.x"
   },
   "main": "server.js",
   "scripts": {
@@ -26,18 +26,18 @@
   "license": "ISC",
   "dependencies": {
     "@fast-csv/parse": "^4.3.1",
-    "@hapi/joi": "^17.1.1",
+    "joi": "^17.2.0",
     "@koa/cors": "^3.1.0",
-    "@koa/router": "^9.3.1",
-    "knex": "^0.21.1",
+    "@koa/router": "^9.4.0",
+    "knex": "^0.21.4",
     "koa": "^2.13.0",
     "koa-body": "^4.2.0",
-    "koa-jwt": "^3.6.0",
+    "koa-jwt": "^4.0.0",
     "koa-redis": "^4.0.1",
     "koa-session": "^6.0.0",
     "moment": "^2.24.0",
-    "objection": "^2.1.3",
-    "pg": "^8.0.0"
+    "objection": "^2.2.2",
+    "pg": "^8.3.0"
   },
   "devDependencies": {
     "@types/hapi__joi": "^17.1.0",
@@ -46,13 +46,14 @@
     "@types/koa-session": "^5.10.2",
     "@types/koa__cors": "^3.0.1",
     "@types/koa__router": "^8.0.2",
-    "@types/pg": "^7.14.3",
+    "@types/pg": "^7.14.4",
+    "colorette": "1.2.0",
     "dotenv": "^8.2.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.7.0",
     "nodemon": "^2.0.4",
-    "ts-node": "^8.3.0",
-    "tsconfig-paths": "^3.8.0",
+    "ts-node": "^8.10.2",
+    "tsconfig-paths": "^3.9.0",
     "tscpaths": "0.0.9",
-    "typescript": "^3.5.3"
+    "typescript": "^3.9.7"
   }
 }
