@@ -24,16 +24,16 @@ export async function csvToJson(ctx: Context, next: Next): Promise<Middleware> {
                         },
                         customer: {
                             name: customer,
-                            bank: Number(bank),
-                            card: {
-                                new: Boolean(typeId && associationId),
-                                info: typeId && associationId ? {
-                                    closingDate: closingDate || undefined,
-                                    dueDate: dueDate || undefined,
-                                    typeId: typeId,
-                                    associationId: associationId
-                                } : undefined
-                            }
+                        },
+                        bank: Number(bank),
+                        card: {
+                            new: Boolean(typeId && associationId),
+                            info: typeId && associationId ? {
+                                closingDate: closingDate || undefined,
+                                dueDate: dueDate || undefined,
+                                typeId: typeId,
+                                associationId: associationId
+                            } : undefined
                         },
                         tags: tags = (tags.split(',') || []).map((tag: string) => tag.trim())
                     };

@@ -1,4 +1,4 @@
-import { object, array, ref, date, number, string, boolean, when } from "@hapi/joi";
+import { object, array, ref, date, number, string, boolean, when } from "joi";
 import { SearchType } from "@enums/search.enum";
 import { Banks } from "@enums/bank.enum";
 
@@ -18,18 +18,18 @@ const payment = object({
   customer: object({
     name: string().max(30).required(),
     id: number().optional(),
-    bank: number().default(0).valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
-    card: object({
-      new: boolean().required(),
-      id: number().optional(),
-      info: when('new', {is: true, then: object({
-        dueDate: number(),
-        closingDate: number(),
-        typeId: number().required(),
-        associationId: number().required()
-      }).required(), otherwise: object().default({})})
-    }).optional(),
   }).required(),
+  bank: number().default(0).valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
+  card: object({
+    new: boolean().required(),
+    id: number().optional(),
+    info: when('new', {is: true, then: object({
+      dueDate: number(),
+      closingDate: number(),
+      typeId: number().required(),
+      associationId: number().required()
+    }).required(), otherwise: object().default({})})
+  }).optional(),
   manufacturer: object({
     name: string().max(30).required(),
     id: number().optional()
