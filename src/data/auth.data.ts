@@ -1,4 +1,4 @@
-import { psqlKnex } from '@root/db';
+import { psqlKnex } from './../../db';
 
 const authRegister = async (user: {[key: string]: string}, login: {[key: string]: any}) => {
   const trxProvider = psqlKnex.transactionProvider();

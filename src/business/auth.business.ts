@@ -1,9 +1,9 @@
 import { Context } from 'koa';
 import { scryptSync, randomBytes } from 'crypto';
-import { authLogin, authUpdateLogin, authRegister } from '@data/auth.data';
-import { jwtSecret, jwtRefreshSecret } from '@root/config';
-import { redisStore } from '@root/db';
-import JwToken from '@utils/jwt.utils';
+import { authLogin, authUpdateLogin, authRegister } from './../data/auth.data';
+import { jwtSecret, jwtRefreshSecret } from './../../config';
+import { redisStore } from './../../db';
+import JwToken from './../utils/jwt.utils';
 
 const jwToken = new JwToken();
 

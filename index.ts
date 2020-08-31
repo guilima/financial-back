@@ -3,9 +3,9 @@ import bodyParser from 'koa-body';
 import cors from '@koa/cors';
 import router from './src/routes/index';
 import session from 'koa-session';
-import errorHandler from '@middleware/errorHandler';
-import { appCors, port, cookieKeys } from '@root/config';
-import { redisStore } from '@root/db';
+import errorHandler from './src/middleware/errorHandler';
+import { appCors, port, cookieKeys } from './config';
+import { redisStore } from './db';
 
 const app = new Koa();
 app.keys = cookieKeys;

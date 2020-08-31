@@ -1,4 +1,4 @@
-import { psqlKnex } from '@root/db';
+import { psqlKnex } from './../../db';
 
 const WalletData = {
   selectByUserId: async (id: number) => {

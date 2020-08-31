@@ -1,10 +1,10 @@
 import Router from '@koa/router';
-import { WalletBusiness, search, PaymentBusiness, detailPayment, walletPayment, cards } from '@business/wallet.business';
+import { WalletBusiness, search, PaymentBusiness, detailPayment, walletPayment, cards } from './../business/wallet.business';
 import { DefaultState, Context } from 'koa';
-import schemaValidator from '@middleware/schemaValidator';
-import jwt from '@middleware/authValidator';
-import authRenewer from '@middleware/authRenewer';
-import { csvToJson } from '@middleware/fileParser';
+import schemaValidator from './../middleware/schemaValidator';
+import jwt from './../middleware/authValidator';
+import authRenewer from './../middleware/authRenewer';
+import { csvToJson } from './../middleware/fileParser';
 const routes = new Router<DefaultState, Context>();
 
 routes

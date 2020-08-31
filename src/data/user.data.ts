@@ -1,4 +1,4 @@
-import { psqlKnex } from '@root/db';
+import { psqlKnex } from './../../db';
 
 const userFindByEmail = async (email: string) => {
   try {

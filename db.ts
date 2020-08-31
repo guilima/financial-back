@@ -1,6 +1,7 @@
 import { postgresURI, redisURI } from './config';
 import Knex from 'knex';
-import { knexSnakeCaseMappers } from 'objection';
+import pkg from 'objection';
+const { knexSnakeCaseMappers } = pkg;
 import Redis from 'koa-redis';
 
 export const postgresConfig: Knex.Config = {

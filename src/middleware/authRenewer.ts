@@ -1,7 +1,7 @@
-import { jwtSecret, jwtRefreshSecret } from '@root/config';
-import JwToken from '@utils/jwt.utils';
+import { jwtSecret, jwtRefreshSecret } from './../../config';
+import JwToken from './../utils/jwt.utils';
 import { Context, Next, Middleware } from 'koa';
-import { redisStore } from '@root/db';
+import { redisStore } from './../../db';
 
 const jwToken = new JwToken();
 

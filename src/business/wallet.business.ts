@@ -1,9 +1,10 @@
 import { Context } from "koa";
-import { WalletData, productsByName, manufacturersByName, categoriesByName, registerPayment, detailByPaymentId, paymentsByWalletId, tagsByName, customersByName, cardsByCustomerId } from "@data/wallet.data"
-import { SearchType } from "@enums/search.enum";
-import { PaymentType } from "@root/src/enums/payment.enum";
-import { CardType, CardAssociation } from "@root/src/enums/card.enum";
-import { utc } from "moment";
+import { WalletData, productsByName, manufacturersByName, categoriesByName, registerPayment, detailByPaymentId, paymentsByWalletId, tagsByName, customersByName, cardsByCustomerId } from "./../data/wallet.data"
+import { SearchType } from "./../enums/search.enum";
+import { PaymentType } from "./../enums/payment.enum";
+import { CardType, CardAssociation } from "./../enums/card.enum";
+import pkg from "moment";
+const { utc } = pkg;
 
 interface IdName {id?: number, name: string}
 interface Card {typeId?: CardType, associationId?: CardAssociation, id?: number, dueDate?: Date, closingDate?: Date};
