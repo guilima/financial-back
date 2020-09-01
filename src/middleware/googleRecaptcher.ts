@@ -1,5 +1,5 @@
 import { Context, Next, Middleware } from 'koa';
-import GoogleRecaptchaAPI from '@services/googleRecaptcha.service';
+import GoogleRecaptchaAPI from './../services/googleRecaptcha.service';
 
 const googleRecaptchaAPI = new GoogleRecaptchaAPI();
 

@@ -1,10 +1,10 @@
 import Router from '@koa/router';
-import { login, register, logout, authverify } from '@business/auth.business';
+import { login, register, logout, authverify } from './../business/auth.business';
 import { DefaultState, Context } from 'koa';
-import jwt from '@middleware/authValidator';
-import authRenewer from '@middleware/authRenewer';
-import googleRecaptcher from '@middleware/googleRecaptcher';
-import schemaValidator from '@middleware/schemaValidator';
+import jwt from './../middleware/authValidator';
+import authRenewer from './../middleware/authRenewer';
+import googleRecaptcher from './../middleware/googleRecaptcher';
+import schemaValidator from './../middleware/schemaValidator';
 const routes = new Router<DefaultState, Context>();
 
 routes

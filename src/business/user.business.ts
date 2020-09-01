@@ -1,5 +1,5 @@
 import { Context } from "koa";
-import { userFindByEmail } from "@data/user.data"
+import { userFindByEmail } from "./../data/user.data"
 
 const userExist = async (ctx: Context) => {
   const request: { email: string } = ctx.request.body;

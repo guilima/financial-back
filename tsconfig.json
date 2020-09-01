@@ -2,20 +2,11 @@
     "compilerOptions": {
       "baseUrl": ".",
       "paths": {
-        "@root/*": ["*"],
-        "@business/*": ["src/business/*"],
-        "@data/*": ["src/data/*"],
-        "@enums/*": ["src/enums/*"],
-        "@middleware/*": ["src/middleware/*"],
-        "@routes/*": ["src/routes/*"],
-        "@schema/*": ["src/schema/*"],
-        "@services/*": ["src/services/*"],
-        "@utils/*": ["src/utils/*"],
         "*": ["node_modules/*"]
       },
       "outDir": "dist",
       "lib": ["ESNext"],
-      "module": "CommonJS",
+      "module": "ESNext",
       "target": "ESNext",
       "moduleResolution": "Node",
       "removeComments": true,

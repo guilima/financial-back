@@ -1,7 +1,7 @@
 {
 	"verbose": false,
 	"debug": false,
-	"exec": "node --inspect -r dotenv/config -r ts-node/register -r tsconfig-paths/register ./index.ts",
+	"exec": "node --inspect --experimental-specifier-resolution=node -r dotenv/config --loader ts-node/esm ./index.ts",
 	"ignore": [
 		"node_modules",
 		"./test",

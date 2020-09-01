@@ -1,5 +1,5 @@
 import { request } from 'https';
-import { googleRecaptchaV2ApiKey } from '@root/config';
+import { googleRecaptchaV2ApiKey } from './../../config';
 
 interface SiteVerify {success: boolean;challenge_ts: string;ostname: string;"error-codes"?: string[]}
 

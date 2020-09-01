@@ -1,5 +1,5 @@
 import { ObjectSchema } from "joi";
-import { routeSchemas } from "@schema/series.schema";
+import { routeSchemas } from "./../schema/series.schema";
 import { Context, Next, Middleware } from "koa";
 
 export default async (ctx: Context, next: Next): Promise<Middleware> => {

@@ -1,102 +1,102 @@
-import { object, array, ref, date, number, string, boolean, when } from "joi";
-import { SearchType } from "@enums/search.enum";
-import { Banks } from "@enums/bank.enum";
+import { SearchType } from "./../enums/search.enum";
+import { Banks } from "./../enums/bank.enum";
+import Joi from "joi";
 
-const payment = object({
-  date: date().iso().required().raw(),
-  price: number().required(),
-  installment: number().required(),
-  description: string().allow('').allow(null).default('').max(255),
-  product: object({
-    name: string().required().max(100),
-    id: number().optional()
+const payment = Joi.object({
+  date: Joi.date().iso().required().raw(),
+  price: Joi.number().required(),
+  installment: Joi.number().required(),
+  description: Joi.string().allow('').allow(null).default('').max(255),
+  product: Joi.object({
+    name: Joi.string().required().max(100),
+    id: Joi.number().optional()
   }).required(),
-  category: object({
-    name: string().required().max(30),
-    id: number().optional(),
+  category: Joi.object({
+    name: Joi.string().required().max(30),
+    id: Joi.number().optional(),
   }).required(),
-  customer: object({
-    name: string().max(30).required(),
-    id: number().optional(),
+  customer: Joi.object({
+    name: Joi.string().max(30).required(),
+    id: Joi.number().optional(),
   }).required(),
-  bank: number().default(0).valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
-  card: object({
-    new: boolean().required(),
-    id: number().optional(),
-    info: when('new', {is: true, then: object({
-      dueDate: number(),
-      closingDate: number(),
-      typeId: number().required(),
-      associationId: number().required()
-    }).required(), otherwise: object().default({})})
+  bank: Joi.number().default(0).valid(...Object.values(Banks).filter(item => Number.isInteger(item))),
+  card: Joi.object({
+    new: Joi.boolean().required(),
+    id: Joi.number().optional(),
+    info: Joi.when('new', {is: true, then: Joi.object({
+      dueDate: Joi.number(),
+      closingDate: Joi.number(),
+      typeId: Joi.number().required(),
+      associationId: Joi.number().required()
+    }).required(), otherwise: Joi.object().default({})})
   }).optional(),
-  manufacturer: object({
-    name: string().max(30).required(),
-    id: number().optional()
+  manufacturer: Joi.object({
+    name: Joi.string().max(30).required(),
+    id: Joi.number().optional()
   }).required(),
-  tags: array().items(string().max(30))
+  tags: Joi.array().items(Joi.string().max(30))
 });
 
 const routeSchemas = {
   get: [
-    ["/series", object({
-      idGroup: array().items(number()).single().unique().required(),
-      dateInitial: date().iso().max('now').required().raw(),
-      dateEnd: date().iso().max('now').min(ref('dateInitial')).required().raw()
+    ["/series", Joi.object({
+      idGroup: Joi.array().items(Joi.number()).single().unique().required(),
+      dateInitial: Joi.date().iso().max('now').required().raw(),
+      dateEnd: Joi.date().iso().max('now').min(Joi.ref('dateInitial')).required().raw()
     })],
-    ["/userExist", object({
-      email: string().email({ tlds: { allow: false } }).required()
+    ["/userExist", Joi.object({
+      email: Joi.string().email({ tlds: { allow: false } }).required()
     })],
-    ["/wallet", object({})],
-    ["/wallet/:id", object({})],
-    ["/wallet/:id/search", object({
-      type: number().valid(...Object.values(SearchType).filter(item => Number.isInteger(item))),
-      term: string().required()
+    ["/wallet", Joi.object({})],
+    ["/wallet/:id", Joi.object({})],
+    ["/wallet/:id/search", Joi.object({
+      type: Joi.number().valid(...Object.values(SearchType).filter(item => Number.isInteger(item))),
+      term: Joi.string().required()
     })],
-    ["/wallet/:id/payment/:id", object({})],
-    ["/cards", object({
-      customerId: number().required(),
-      bankId: number().required(),
+    ["/wallet/:id/payment/:id", Joi.object({})],
+    ["/cards", Joi.object({
+      customerId: Joi.number().required(),
+      bankId: Joi.number().required(),
     })],
   ],
   post: [
-    ["/series", object({
-      idGroup: array().items(number()).single().unique().required(),
-      date: object({
-        initial: date().iso().max('now').required().raw(),
-        end: date().iso().max('now').min(ref('initial')).required().raw()
+    ["/series", Joi.object({
+      idGroup: Joi.array().items(Joi.number()).single().unique().required(),
+      date: Joi.object({
+        initial: Joi.date().iso().max('now').required().raw(),
+        end: Joi.date().iso().max('now').min(Joi.ref('initial')).required().raw()
       })
     })],
-    ["/login", object({
-      recaptchaToken: string().required(),
-      email: string().max(256).required(),
-      password: string().required()
+    ["/login", Joi.object({
+      recaptchaToken: Joi.string().required(),
+      email: Joi.string().max(256).required(),
+      password: Joi.string().required()
     })],
-    ["/logout", object({})],
-    ["/authverify", object({})],
-    ["/register", object({
-      recaptchaToken: string().required(),
-      userName: string().max(30).required(),
-      fullName: string().max(100).required(),
-      email: string().email({ tlds: { allow: false } }).max(256).required(),
-      password: string().required()
+    ["/logout", Joi.object({})],
+    ["/authverify", Joi.object({})],
+    ["/register", Joi.object({
+      recaptchaToken: Joi.string().required(),
+      userName: Joi.string().max(30).required(),
+      fullName: Joi.string().max(100).required(),
+      email: Joi.string().email({ tlds: { allow: false } }).max(256).required(),
+      password: Joi.string().required()
     })],
-    ["/wallet", object({
-      name: string().max(50).required(),
-      description: string().max(255),
+    ["/wallet", Joi.object({
+      name: Joi.string().max(50).required(),
+      description: Joi.string().max(255),
     })],
-    ["/wallet/:id/import", array().items(payment)],
+    ["/wallet/:id/import", Joi.array().items(payment)],
     ["/wallet/:id/payment", payment],
   ]
 };
-const IGetValoresSeriesJSONResponse = array().items(
-  object({
-    ID: number().required(),
-    item: array().items(
-      object({
-        data: string().regex(/^\d+\/\d+$/, 'MM/YYYY').required(),
-        valor: number().precision(2).allow("").required(),
-        bloqueado: boolean().required()
+const IGetValoresSeriesJSONResponse = Joi.array().items(
+  Joi.object({
+    ID: Joi.number().required(),
+    item: Joi.array().items(
+      Joi.object({
+        data: Joi.string().regex(/^\d+\/\d+$/, 'MM/YYYY').required(),
+        valor: Joi.number().precision(2).allow("").required(),
+        bloqueado: Joi.boolean().required()
       })
     ).single().unique().required(),
   })
