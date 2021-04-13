@@ -52,6 +52,7 @@
     "eslint": "^7.7.0",
     "nodemon": "^2.0.4",
     "ts-node": "^9.0.0",
+    "tscpaths": "0.0.9",
     "typescript": "^3.9.7"
   }
 }
