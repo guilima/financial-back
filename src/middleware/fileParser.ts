@@ -1,6 +1,5 @@
 import { Context, Next, Middleware } from 'koa';
-import pkg from '@fast-csv/parse';
-const { parseFile } = pkg;
+import { parseFile } from '@fast-csv/parse';
 
 export async function csvToJson(ctx: Context, next: Next): Promise<Middleware> {
     const data = [];
