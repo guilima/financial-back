@@ -3,4 +3,5 @@ dist
 node_modules
 *.pem
 *.crt
+*.code-workspace
 .env
