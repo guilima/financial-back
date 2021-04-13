@@ -24,7 +24,6 @@
   ],
   "author": "Guilherme Lima",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@fast-csv/parse": "^4.3.6",
     "joi": "^17.2.1",
@@ -53,7 +52,7 @@
     "nodemon": "^2.0.4",
     "ts-node": "^9.0.0",
     "tscpaths": "0.0.9",
-    "typescript": "^3.9.7"
+    "typescript": "^4.2.3"
   },
   "volta": {
     "node": "14.16.0"

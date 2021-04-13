@@ -6,7 +6,7 @@
       },
       "outDir": "dist",
       "lib": ["ESNext"],
-      "module": "ESNext",
+      "module": "CommonJS",
       "target": "ESNext",
       "moduleResolution": "Node",
       "removeComments": true,
